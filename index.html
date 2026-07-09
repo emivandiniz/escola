@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="logo.jpg">
 <title>Angenda Ivan Diniz</title>
-
 <style>
     *{
         box-sizing: border-box;
@@ -15,7 +14,7 @@
     body{
         background: #f3f5f9;
         margin: 0;
-        padding: 15px; /* Reduzido para telas menores */
+        padding: 15px;
     }
 
     .container{
@@ -31,7 +30,6 @@
         font-size: 1.8rem;
     }
 
-    /* Abas Estilizadas */
     .menu{
         display: flex;
         gap: 10px;
@@ -41,7 +39,7 @@
     }
 
     .menu button{
-        flex: 1; /* Faz os botões ocuparem espaço igual no celular */
+        flex: 1;
         border: none;
         background: #e5e7eb;
         color: #4b5563;
@@ -60,11 +58,14 @@
 
     .busca{
         position: relative;
+        display: flex;
+        align-items: center;
     }
 
     input{
         width: 100%;
         padding: 15px;
+        padding-right: 45px; /* Espaço para o botão X não ficar em cima do texto */
         border: 2px solid transparent;
         border-radius: 12px;
         font-size: 16px;
@@ -77,12 +78,37 @@
         border-color: #2563eb;
     }
 
+    /* Botão de Limpar (X) */
+    .btn-limpar {
+        position: absolute;
+        right: 15px;
+        background: #e5e7eb;
+        color: #6b7280;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        display: none; /* Escondido por padrão */
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .btn-limpar:hover {
+        background: #d1d5db;
+        color: #1f2937;
+    }
+
     .autocomplete{
         position: absolute;
         width: 100%;
         background: white;
         border-radius: 12px;
         overflow: hidden;
+        top: 100%;
         margin-top: 5px;
         box-shadow: 0 5px 15px rgba(0,0,0,.15);
         z-index: 999;
@@ -150,7 +176,6 @@
         color: #374151;
     }
 
-    /* Estilos para a lista de aniversários */
     .card-aniversariante {
         background: white;
         padding: 15px;
@@ -178,7 +203,6 @@
         padding: 20px;
     }
 
-    /* Media Query para Responsividade em telas bem pequenas */
     @media (max-width: 480px) {
         body { padding: 10px; }
         h1 { font-size: 1.5rem; }
@@ -192,13 +216,11 @@
 
     <h1>📚 Agenda Telefônica Escolar</h1>
 
-    <!-- Abas de Navegação -->
     <div class="menu">
         <button id="btnBusca" class="active" onclick="trocarAba('busca')">🔍 Contatos</button>
         <button id="btnAniversarios" onclick="trocarAba('aniversarios')">🎂 Aniversariantes da Semana</button>
     </div>
 
-    <!-- Conteúdo da Aba 1: Busca e Agenda -->
     <div id="painelBusca">
         <div class="busca">
             <input
@@ -206,6 +228,8 @@
                 id="pesquisa"
                 placeholder="Digite o nome do aluno..."
                 autocomplete="off">
+            <!-- Novo botão de limpar -->
+            <button id="btnLimpar" class="btn-limpar" onclick="limparBusca()">✕</button>
 
             <div id="lista" class="autocomplete"></div>
         </div>
@@ -213,7 +237,6 @@
         <div id="card" class="card" style="display:none;"></div>
     </div>
 
-    <!-- Conteúdo da Aba 2: Aniversariantes -->
     <div id="painelAniversarios" style="display:none;">
         <div id="listaAniversarios"></div>
     </div>
@@ -224,7 +247,6 @@
 
 let alunos = [];
 
-// Carrega os dados do arquivo JSON
 fetch("contato.json")
 .then(r => r.json())
 .then(dados=>{
@@ -234,8 +256,8 @@ fetch("contato.json")
 const pesquisa = document.getElementById("pesquisa");
 const lista = document.getElementById("lista");
 const card = document.getElementById("card");
+const btnLimpar = document.getElementById("btnLimpar");
 
-// Controle de troca de Abas
 function trocarAba(aba) {
     if (aba === 'busca') {
         document.getElementById("painelBusca").style.display = "block";
@@ -251,14 +273,20 @@ function trocarAba(aba) {
     }
 }
 
-// Evento de Input no campo de busca
+// Controla a digitação e a exibição do botão "X"
 pesquisa.addEventListener("input", ()=>{
     const texto = pesquisa.value.trim().toUpperCase();
     lista.innerHTML = "";
 
+    // Se tiver texto, mostra o botão X. Se não, esconde.
+    if (pesquisa.value.length > 0) {
+        btnLimpar.style.display = "flex";
+    } else {
+        btnLimpar.style.display = "none";
+    }
+
     if(texto.length < 2) return;
 
-    // Filtra e limita rigorosamente a 8 resultados
     const encontrados = alunos
         .filter(a => a.nome && a.nome.toUpperCase().includes(texto))
         .slice(0, 8);
@@ -281,7 +309,16 @@ pesquisa.addEventListener("input", ()=>{
     });
 });
 
-// Renderiza as informações detalhadas do Aluno
+// Nova Função para limpar tudo
+function limparBusca() {
+    pesquisa.value = "";
+    lista.innerHTML = "";
+    card.innerHTML = "";
+    card.style.display = "none";
+    btnLimpar.style.display = "none";
+    pesquisa.focus(); // Devolve o foco para o teclado do usuário
+}
+
 function mostrarAluno(aluno){
     const outros = [];
 
@@ -330,21 +367,17 @@ function mostrarAluno(aluno){
     card.style.display = "block";
 }
 
-// Fecha a lista de autocomplete se clicar fora dela
 document.addEventListener("click", e=>{
-    if(!lista.contains(e.target) && e.target !== pesquisa){
+    if(!lista.contains(e.target) && e.target !== pesquisa && e.target !== btnLimpar){
         lista.innerHTML = "";
     }
 });
 
-// Função para buscar aniversariantes da SEMANA CORRENTE (de domingo a sábado)
 function mostrarAniversariantes(){
     const div = document.getElementById("listaAniversarios");
     div.innerHTML = "";
 
     const hoje = new Date();
-    
-    // Calcula o início (domingo) e fim (sábado) da semana atual
     const diaDaSemana = hoje.getDay(); 
     const inicioSemana = new Date(hoje);
     inicioSemana.setDate(hoje.getDate() - diaDaSemana);
@@ -352,19 +385,15 @@ function mostrarAniversariantes(){
     const fimSemana = new Date(inicioSemana);
     fimSemana.setDate(inicioSemana.getDate() + 6);
 
-    // Filtra os alunos que fazem aniversário nessa janela de dias/meses
     const aniversariantes = alunos.filter(a=>{
         if(!a.nascimento) return false;
 
-        // Formato esperado do JSON: "DD/MM/AAAA" ou "DD/MM"
         const partes = a.nascimento.split("/");
         const diaNasc = parseInt(partes[0], 10);
-        const mesNasc = parseInt(partes[1], 10) - 1; // Meses no JS vão de 0 a 11
+        const mesNasc = parseInt(partes[1], 10) - 1;
 
-        // Cria uma data fictícia no ano atual para validar o período da semana
         const dataNascEsteAno = new Date(hoje.getFullYear(), mesNasc, diaNasc);
 
-        // Zera as horas para comparar apenas os dias estruturalmente
         inicioSemana.setHours(0,0,0,0);
         fimSemana.setHours(23,59,59,999);
         dataNascEsteAno.setHours(12,0,0,0); 
@@ -377,7 +406,6 @@ function mostrarAniversariantes(){
         return;
     }
 
-    // Renderiza a lista formatada
     div.innerHTML = aniversariantes.map(a=>`
         <div class="card-aniversariante">
             <h3>🎉 ${a.nome}</h3>
