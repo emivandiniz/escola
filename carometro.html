@@ -5,92 +5,393 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEu6XYfBX6dLECkxfarfPyb2WfE9KQSWr1B8WeCshx2w&s">
     <title>Carômetro Firmo de Mattos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Dependências oficiais de Script -->
     <link rel="stylesheet" href="all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
 
-    <div id="tela-selecao" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-200">
-            <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Selecione a Turma</h2>
-            <div class="mb-4">
-                <label class="block text-sm font-semibold mb-2">Turmas disponíveis:</label>
-                <select id="select-turmas" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <style>
+        /* Estilos Base Replicados do Tailwind */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Tela de Seleção */
+        .flex-center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .card-selecao {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 28rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .titulo-principal {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 1.5rem;
+        }
+
+        .label-form {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .select-custom {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 1rem;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .select-custom:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover { background-color: #1d4ed8; }
+
+        /* Cabeçalho */
+        .header-carometro {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .titulo-header { font-size: 1.5rem; font-weight: 700; }
+        .subtitulo-header { color: #bfdbfe; font-size: 0.875rem; }
+
+        .btn-voltar {
+            background-color: #1e40af;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+
+        .btn-voltar:hover { background-color: #1d4ed8; }
+
+        /* Métricas */
+        .main-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) { .main-content { padding: 1.5rem; } }
+
+        .grid-metricas {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) { .grid-metricas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        .card-metrica {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .metrica-num { font-size: 1.875rem; font-weight: 700; }
+        .text-blue-900 { color: #1e3a8a; }
+        .text-green-600 { color: #16a34a; }
+        .text-amber-500 { color: #f59e0b; }
+
+        .metrica-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Grid de Alunos */
+        .grid-alunos {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) { .grid-alunos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 768px) { .grid-alunos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .grid-alunos { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+        /* Card Aluno */
+        .card-aluno {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            min-height: 280px;
+        }
+
+        .container-foto {
+            width: 6rem;
+            height: 6rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-width: 2px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .foto-vazia { background-color: #e2e8f0; border-color: #d1d5db; }
+        .foto-preenchida { border-color: #3b82f6; }
+        .foto-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .icon-user-vazio { font-size: 2.25rem; color: #9ca3af; }
+
+        .nome-aluno {
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #172554;
+            text-transform: uppercase;
+            letter-spacing: -0.025em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .acoes-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-acao {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            color: #ffffff;
+            font-size: 0.75rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+
+        .bg-green-600 { background-color: #16a34a; } .bg-green-600:hover { background-color: #15803d; }
+        .bg-red-500 { background-color: #ef4444; } .bg-red-500:hover { background-color: #dc2626; }
+        .bg-purple-600 { background-color: #9333ea; } .bg-purple-600:hover { background-color: #7e22ce; }
+        .bg-blue-500 { background-color: #3b82f6; } .bg-blue-500:hover { background-color: #2563eb; }
+        .bg-cyan-500 { background-color: #06b6d4; } .bg-cyan-500:hover { background-color: #0891b2; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 28rem;
+            width: 100%;
+            padding: 1.5rem;
+        }
+
+        .modal-titulo { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        .input-modal {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+        }
+        .input-modal:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }
+
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+        
+        .btn-cancelar {
+            padding: 0.5rem 1rem;
+            background-color: #e5e7eb;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-cancelar:hover { background-color: #d1d5db; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA SELEÇÃO DE TURMAS -->
+    <div id="tela-selecao" class="flex-center-container">
+        <div class="card-selecao">
+            <h2 class="titulo-principal">Selecione a Turma</h2>
+            <div style="margin-bottom: 1rem;">
+                <label class="label-form">Turmas disponíveis:</label>
+                <select id="select-turmas" class="select-custom">
                     <option value="">Carregando turmas...</option>
                 </select>
             </div>
-            <button onclick="entrarNaTurma()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+            <button onclick="entrarNaTurma()" class="btn-primary">
                 Acessar Carômetro
             </button>
         </div>
     </div>
 
+    <!-- TELA PRINCIPAL CARÔMETRO -->
     <div id="tela-carometro" class="hidden">
-        <header class="bg-blue-900 text-white p-6 shadow-md">
-            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <header class="header-carometro">
+            <div class="header-content">
                 <div>
-                    <h1 id="titulo-turma" class="text-2xl font-bold">Carômetro</h1>
-                    <p class="text-sm text-blue-200">Gerencie as fotos dos alunos</p>
+                    <h1 id="titulo-turma" class="titulo-header">Carômetro</h1>
+                    <p class="subtitulo-header">Gerencie as fotos dos alunos</p>
                 </div>
-                <button onclick="voltarParaSelecao()" class="bg-blue-800 hover:bg-blue-700 px-4 py-2 rounded shadow transition font-semibold text-sm">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
+                <button onclick="voltarParaSelecao()" class="btn-voltar">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 0.5rem;"></i> Voltar
                 </button>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto p-4 md:p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <p id="meta-total" class="text-3xl font-bold text-blue-900">0</p>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total de Alunos</p>
+        <main class="main-content">
+            <!-- Métricas -->
+            <div class="grid-metricas">
+                <div class="card-metrica">
+                    <p id="meta-total" class="metrica-num text-blue-900">0</p>
+                    <p class="metrica-label">Total de Alunos</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <p id="meta-com-foto" class="text-3xl font-bold text-green-600">0</p>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Com Foto</p>
+                <div class="card-metrica">
+                    <p id="meta-com-foto" class="metrica-num text-green-600">0</p>
+                    <p class="metrica-label">Com Foto</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <p id="meta-sem-foto" class="text-3xl font-bold text-amber-500">0</p>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Sem Foto</p>
+                <div class="card-metrica">
+                    <p id="meta-sem-foto" class="metrica-num text-amber-500">0</p>
+                    <p class="metrica-label">Sem Foto</p>
                 </div>
             </div>
 
-            <div id="grid-alunos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                </div>
+            <!-- Grid de Alunos -->
+            <div id="grid-alunos" class="grid-alunos"></div>
         </main>
     </div>
 
     <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden">
     <input type="file" id="input-galeria" accept="image/*" class="hidden">
 
-    <div id="modal-edicao" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Editar Aluno</h3>
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="modal-edicao" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="modal-titulo">Editar Aluno</h3>
             <input type="hidden" id="edit-aluno-id">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Nome do Aluno</label>
-                    <input type="text" id="edit-nome" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="label-form">Nome do Aluno</label>
+                    <input type="text" id="edit-nome" class="input-modal">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Nome da Turma</label>
-                    <input type="text" id="edit-turma" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="label-form">Nome da Turma</label>
+                    <input type="text" id="edit-turma" class="input-modal">
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="fecharModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition">Cancelar</button>
-                <button onclick="salvarEdicaoAluno()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Salvar Alterações</button>
+            <div class="modal-footer">
+                <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button onclick="salvarEdicaoAluno()" class="btn-primary" style="width: auto;">Salvar Alterações</button>
             </div>
         </div>
     </div>
 
     <script>
         // CONFIGURAÇÃO DO SEU SUPABASE
-const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
-         
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
+                 
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let alunoSelecionadoParaUpload = null;
 
@@ -162,18 +463,18 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
             alunos.forEach(aluno => {
                 const card = document.createElement("div");
-                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-between text-center min-h-[280px]";
+                card.className = "card-aluno";
                 
                 // Exibição da foto ou ícone padrão
                 let areaFoto = `
-                    <div class="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center border-2 border-gray-300 overflow-hidden mb-3">
-                        <i class="fa-solid fa-user text-4xl text-gray-400"></i>
+                    <div class="container-foto foto-vazia">
+                        <i class="fa-solid fa-user icon-user-vazio"></i>
                     </div>`;
                 
                 if (aluno.photo_url) {
                     areaFoto = `
-                        <div class="w-24 h-24 rounded-full border-2 border-blue-500 overflow-hidden mb-3">
-                            <img src="${aluno.photo_url}" class="w-full h-full object-cover">
+                        <div class="container-foto foto-preenchida">
+                            <img src="${aluno.photo_url}" class="foto-img">
                         </div>`;
                 }
 
@@ -181,24 +482,24 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
                 let botoesAcao = "";
                 if (aluno.photo_url) {
                     botoesAcao = `
-                        <button onclick="window.open('${aluno.photo_url}', '_blank')" class="w-8 h-8 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs shadow" title="Ver foto"><i class="fa-solid fa-magnifying-glass"></i></button>
-                        <button onclick="removerFoto('${aluno.id}')" class="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs shadow" title="Excluir foto"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600" title="Ver foto"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button onclick="removerFoto('${aluno.id}')" class="btn-acao bg-red-500" title="Excluir foto"><i class="fa-solid fa-trash"></i></button>
                     `;
                 } else {
                     botoesAcao = `
-                        <button onclick="dispararUpload('${aluno.id}', 'camera')" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs shadow" title="Tirar Foto"><i class="fa-solid fa-camera"></i></button>
-                        <button onclick="dispararUpload('${aluno.id}', 'galeria')" class="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-xs shadow" title="Escolher da Galeria"><i class="fa-solid fa-image"></i></button>
+                        <button onclick="dispararUpload('${aluno.id}', 'camera')" class="btn-acao bg-purple-600" title="Tirar Foto"><i class="fa-solid fa-camera"></i></button>
+                        <button onclick="dispararUpload('${aluno.id}', 'galeria')" class="btn-acao bg-blue-500" title="Escolher da Galeria"><i class="fa-solid fa-image"></i></button>
                     `;
                 }
 
                 card.innerHTML = `
-                    <div class="flex flex-col items-center w-full">
+                    <div class="flex-col w-full" style="display: flex; align-items: center;">
                         ${areaFoto}
-                        <h4 class="font-bold text-sm text-blue-950 uppercase tracking-tight line-clamp-2 px-1 mb-1">${aluno.student_name}</h4>
+                        <h4 class="nome-aluno">${aluno.student_name}</h4>
                     </div>
-                    <div class="flex items-center justify-center gap-2 mt-4 w-full">
+                    <div class="acoes-container">
                         ${botoesAcao}
-                        <button onclick="abrirModalEdicao('${aluno.id}', '${aluno.student_name}', '${aluno.class_name}')" class="w-8 h-8 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white text-xs shadow" title="Editar dados"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="abrirModalEdicao('${aluno.id}', '${aluno.student_name}', '${aluno.class_name}')" class="btn-acao bg-cyan-500" title="Editar dados"><i class="fa-solid fa-pen"></i></button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -213,111 +514,90 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         }
 
         function configurarInputsDeArquivo() {
-    const processarArquivo = async (evento) => {
-        const file = evento.target.files[0];
-        if (!file || !alunoSelecionadoParaUpload) return;
+            const processarArquivo = async (evento) => {
+                const file = evento.target.files[0];
+                if (!file || !alunoSelecionadoParaUpload) return;
 
-        // --- INÍCIO DA COMPACTAÇÃO ---
-        // Mostra um aviso rápido para o usuário saber que está processando
-        console.log("Compactando imagem...");
+                console.log("Compactando imagem...");
 
-        new Compressor(file, {
-            quality: 0.6,      // 60% de qualidade (reduz o peso drasticamente sem perder nitidez)
-            maxWidth: 800,     // Largura máxima de 800px (ideal para avatares)
-            maxHeight: 800,    // Altura máxima de 800px
-            convertSize: 1000000, // Converte PNG pesado para JPEG se passar de 1MB
+                new Compressor(file, {
+                    quality: 0.6,      
+                    maxWidth: 800,     
+                    maxHeight: 800,    
+                    convertSize: 1000000, 
 
-            success: async (resultadoCompactado) => {
-                // O 'resultadoCompactado' é a foto já leve! Agora fazemos o upload normal.
-                
-                const fileExt = resultadoCompactado.name ? resultadoCompactado.name.split('.').pop() : 'jpg';
-                const caminhoArquivo = `public/${alunoSelecionadoParaUpload}-${Date.now()}.${fileExt}`;
+                    success: async (resultadoCompactado) => {
+                        const fileExt = resultadoCompactado.name ? resultadoCompactado.name.split('.').pop() : 'jpg';
+                        const caminhoArquivo = `public/${alunoSelecionadoParaUpload}-${Date.now()}.${fileExt}`;
 
-                // Upload para o Bucket "fotos-alunos"
-                const { data, error: storageError } = await supabaseClient.storage
-                    .from('fotos-alunos')
-                    .upload(caminhoArquivo, resultadoCompactado);
+                        const { data, error: storageError } = await supabaseClient.storage
+                            .from('fotos-alunos')
+                            .upload(caminhoArquivo, resultadoCompactado);
 
-                if (storageError) return alert("Erro no upload do storage: " + storageError.message);
+                        if (storageError) return alert("Erro no upload do storage: " + storageError.message);
 
-                const { data: { publicUrl } } = supabaseClient.storage.from('fotos-alunos').getPublicUrl(caminhoArquivo);
+                        const { data: { publicUrl } } = supabaseClient.storage.from('fotos-alunos').getPublicUrl(caminhoArquivo);
 
-                // Salvando o link na coluna photo_url da tabela carometro
-                const { error: dbError } = await supabaseClient
-                    .from('carometro')
-                    .update({ photo_url: publicUrl })
-                    .eq('id', alunoSelecionadoParaUpload);
+                        const { error: dbError } = await supabaseClient
+                            .from('carometro')
+                            .update({ photo_url: publicUrl })
+                            .eq('id', alunoSelecionadoParaUpload);
 
-                if (dbError) return alert("Erro ao vincular imagem: " + dbError.message);
+                        if (dbError) return alert("Erro ao vincular imagem: " + dbError.message);
 
-                evento.target.value = "";
-                const turmaAtual = document.getElementById("select-turmas").value;
-                carregarAlunos(turmaAtual);
-                
-                
-            },
-            error(err) {
-                alert("Erro ao compactar a imagem: " + err.message);
-            },
-        });
-        // --- FIM DA COMPACTAÇÃO ---
-    };
+                        evento.target.value = "";
+                        const turmaAtual = document.getElementById("select-turmas").value;
+                        carregarAlunos(turmaAtual);
+                    },
+                    error(err) {
+                        alert("Erro ao compactar a imagem: " + err.message);
+                    },
+                });
+            };
 
-    document.getElementById("input-camera").addEventListener("change", processarArquivo);
-    document.getElementById("input-galeria").addEventListener("change", processarArquivo);
-}
+            document.getElementById("input-camera").addEventListener("change", processarArquivo);
+            document.getElementById("input-galeria").addEventListener("change", processarArquivo);
+        }
 
-        // Remover foto (Define photo_url como null)
-        // Deletar foto do Aluno (No Banco e no Storage)
-async function removerFoto(alunoId) {
-    if (!confirm("Tem certeza que deseja remover a foto deste aluno?")) return;
+        // Remover foto do Aluno (No Banco e no Storage)
+        async function removerFoto(alunoId) {
+            if (!confirm("Tem certeza que deseja remover a foto deste aluno?")) return;
 
-    // 1. Busca o aluno para pegar a photo_url atual antes de apagar
-    const { data: aluno, error: fetchError } = await supabaseClient
-        .from('carometro')
-        .select('photo_url')
-        .eq('id', alunoId)
-        .single();
+            const { data: aluno, error: fetchError } = await supabaseClient
+                .from('carometro')
+                .select('photo_url')
+                .eq('id', alunoId)
+                .single();
 
-    if (fetchError) return alert("Erro ao buscar dados do aluno: " + fetchError.message);
+            if (fetchError) return alert("Erro ao buscar dados do aluno: " + fetchError.message);
 
-    // 2. Se o aluno tiver uma foto cadastrada, apaga ela do Storage primeiro
-    if (aluno && aluno.photo_url) {
-        try {
-            // Extrai o caminho relativo do arquivo de dentro da URL pública do Supabase
-            // Exemplo: de "https://.../fotos-alunos/public/foto.jpg" pega apenas "public/foto.jpg"
-            const caminhoArquivo = aluno.photo_url.split('/fotos-alunos/')[1];
+            if (aluno && aluno.photo_url) {
+                try {
+                    const caminhoArquivo = aluno.photo_url.split('/fotos-alunos/')[1];
+                    if (caminhoArquivo) {
+                        const { error: storageError } = await supabaseClient.storage
+                            .from('fotos-alunos')
+                            .remove([caminhoArquivo]);
 
-            if (caminhoArquivo) {
-                // Deleta o arquivo físico do bucket
-                const { error: storageError } = await supabaseClient.storage
-                    .from('fotos-alunos')
-                    .remove([caminhoArquivo]);
-
-                if (storageError) {
-                    console.error("Aviso: Não foi possível deletar o arquivo do Storage (pode ser que já não existia):", storageError.message);
-                    // Não travamos o código aqui caso o arquivo já tenha sido apagado manualmente no painel
+                        if (storageError) {
+                            console.error("Aviso: Não foi possível deletar o arquivo do Storage:", storageError.message);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Erro ao processar o caminho do arquivo para exclusão:", err);
                 }
             }
-        } catch (err) {
-            console.error("Erro ao processar o caminho do arquivo para exclusão:", err);
+
+            const { error: dbError } = await supabaseClient
+                .from('carometro')
+                .update({ photo_url: null })
+                .eq('id', alunoId);
+
+            if (dbError) return alert("Erro ao remover o vínculo da foto no banco de dados: " + dbError.message);
+
+            const turmaAtual = document.getElementById("select-turmas").value;
+            carregarAlunos(turmaAtual);
         }
-    }
-
-    // 3. Atualiza a tabela definindo a photo_url como null
-    const { error: dbError } = await supabaseClient
-        .from('carometro')
-        .update({ photo_url: null })
-        .eq('id', alunoId);
-
-    if (dbError) return alert("Erro ao remover o vínculo da foto no banco de dados: " + dbError.message);
-
-    // 4. Recarrega a listagem atualizada na tela
-    const turmaAtual = document.getElementById("select-turmas").value;
-    carregarAlunos(turmaAtual);
-    
-   // alert("Foto excluída com sucesso!");
-}
 
         // --- MODAL DE EDIÇÃO ---
         function abrirModalEdicao(id, nome, turma) {
@@ -348,7 +628,6 @@ async function removerFoto(alunoId) {
 
             fecharModal();
             
-            // Mantém o usuário visualizando a turma atual (se ele moveu o aluno de turma, o aluno sumirá daqui)
             const turmaAtual = document.getElementById("select-turmas").value;
             carregarAlunos(turmaAtual);
         }
