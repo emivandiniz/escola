@@ -425,6 +425,7 @@ async function carregarTurmas() {
         select.innerHTML = '<option value="">Tabela vazia ou sem registros</option>';
         return;
     }
+}
 
     // Apenas para listar no console o que ele encontrou
     const turmas = [...new Set(data.map(item => item.class_name))];
