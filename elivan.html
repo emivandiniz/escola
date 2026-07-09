@@ -175,23 +175,21 @@ function mostrarAluno(aluno){
 
     const outros = [];
 
-    if(aluno.contatos2)
-        outros.push(aluno.contatos2);
+Object.keys(aluno).forEach(chave => {
+    const nome = chave.toLowerCase();
 
-    if(aluno.Contatos3)
-        outros.push(aluno.Contatos3);
+    if (
+        nome.includes("contato") ||
+        nome.includes("outro") ||
+        nome.includes("field")
+    ) {
+        const valor = aluno[chave];
 
-    if(aluno.Contatos4)
-        outros.push(aluno.Contatos4);
-
-    if(aluno.outro5)
-        outros.push(aluno.outro5);
-
-    if(aluno.outros6)
-        outros.push(aluno.outros6);
-
-    if(aluno.FIELD12)
-        outros.push(aluno.FIELD12);
+        if (valor && valor.trim() !== "") {
+            outros.push(valor);
+        }
+    }
+});
 
     let listaOutros = "";
 
