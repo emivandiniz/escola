@@ -402,23 +402,42 @@
         });
 
         // Extrai as turmas únicas diretamente da tabela 'carometro'
-        async function carregarTurmas() {
-            const { data, error } = await supabaseClient.from('carometro').select('class_name');
-            if (error) return alert("Erro ao carregar turmas: " + error.message);
-            
-            // Cria uma lista de nomes de turmas sem repetições
-            const turmasUnicas = [...new Set(data.map(item => item.class_name))].sort();
-            
-            const select = document.getElementById("select-turmas");
-            select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
+       // Substitua a sua função carregarTurmas existente por esta:
+async function carregarTurmas() {
+    const select = document.getElementById("select-turmas");
+    select.innerHTML = '<option value="">Carregando turmas...</option>';
 
-            turmasUnicas.forEach(turma => {
-                if(turma) {
-                    select.innerHTML += `<option value="${turma}">${turma}</option>`;
-                }
-            });
+    try {
+        // Buscamos todas as colunas class_name e ordenamos
+        const { data, error } = await supabaseClient
+            .from('carometro')
+            .select('class_name');
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            select.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
+            return;
         }
 
+        // Filtra valores nulos, remove duplicatas e ordena
+        const turmasUnicas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
+        
+        select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
+
+        turmasUnicas.forEach(turma => {
+            const option = document.createElement("option");
+            option.value = turma;
+            option.textContent = turma;
+            select.appendChild(option);
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar turmas:", err);
+        select.innerHTML = '<option value="">Erro ao carregar turmas</option>';
+        alert("Não foi possível carregar as turmas: " + err.message);
+    }
+}
         // Avançar para a tela do Carômetro
         function entrarNaTurma() {
             const nomeTurma = document.getElementById("select-turmas").value;
