@@ -2,9 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="logo.jpg">
-<title>Angenda Ivan Diniz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Ivan Diniz</title>
+
+<!-- Script oficial do cliente Supabase via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
     *{
         box-sizing: border-box;
@@ -56,29 +60,49 @@
         color: white;
     }
 
-    .busca{
+   .busca{
         position: relative;
         display: flex;
         align-items: center;
+        width: 100%; /* Força o contêiner flexível a ocupar toda a largura da página */
     }
 
-    input{
-        width: 100%;
+    input#pesquisa {
+        width: 100%; /* Garante que o input preencha o contêiner completamente */
         padding: 15px;
-        padding-right: 45px; /* Espaço para o botão X não ficar em cima do texto */
+        padding-right: 45px; /* Mantém o espaço para o botão "X" não cobrir o texto */
         border: 2px solid transparent;
         border-radius: 12px;
         font-size: 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,.05);
         outline: none;
         transition: border 0.2s;
+        background: white; /* Garante fundo sólido */
     }
 
-    input:focus {
+    .input-field{
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        transition: border 0.2s;
+        background: #fff;
+    }
+
+    .input-field:focus {
         border-color: #2563eb;
     }
 
-    /* Botão de Limpar (X) */
+    input#pesquisa {
+        padding: 15px;
+        padding-right: 45px;
+        border: 2px solid transparent;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    input#pesquisa:focus { border-color: #2563eb; }
+
     .btn-limpar {
         position: absolute;
         right: 15px;
@@ -88,18 +112,12 @@
         border-radius: 50%;
         width: 24px;
         height: 24px;
-        font-size: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        display: none; /* Escondido por padrão */
+        display: none;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s;
-    }
-
-    .btn-limpar:hover {
-        background: #d1d5db;
-        color: #1f2937;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 12px;
     }
 
     .autocomplete{
@@ -108,10 +126,10 @@
         background: white;
         border-radius: 12px;
         overflow: hidden;
-        top: 100%;
         margin-top: 5px;
         box-shadow: 0 5px 15px rgba(0,0,0,.15);
         z-index: 999;
+        top: 100%;
     }
 
     .item{
@@ -119,61 +137,71 @@
         cursor: pointer;
         border-bottom: 1px solid #eee;
     }
+    .item:hover{ background: #f0f4ff; }
 
-    .item:last-child {
-        border-bottom: none;
-    }
+    .nome{ font-weight: bold; color: #1f2937; }
+    .turma{ color: #6b7280; font-size: 14px; }
 
-    .item:hover{
-        background: #f0f4ff;
-    }
-
-    .nome{
-        font-weight: bold;
-        color: #1f2937;
-    }
-
-    .turma{
-        color: #6b7280;
-        font-size: 14px;
-    }
-
+    /* Estilização do Form / Card CRUD */
     .card{
         background: white;
         margin-top: 20px;
-        padding: 20px;
+        padding: 25px;
         border-radius: 14px;
         box-shadow: 0 4px 12px rgba(0,0,0,.08);
     }
 
-    .linha{
+    .grupo-campo {
         margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .linha:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
     }
 
-    .titulo{
+    .label-crud {
         font-weight: bold;
         color: #2563eb;
-        margin-bottom: 4px;
-        font-size: 14px;
+        font-size: 13px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    ul{
-        margin-top: 8px;
-        padding-left: 20px;
-    }
-
-    li{
         margin-bottom: 5px;
-        color: #374151;
+        display: block;
+    }
+
+    /* Grid para organizar contatos adicionais de forma compacta */
+    .grid-contatos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Ações do CRUD */
+    .acoes-barra {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 15px;
+        flex: 1;
+        transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-salvar { background: #10b981; color: white; }
+    .btn-excluir { background: #ef4444; color: white; }
+    
+    .btn-novo {
+        background: #2563eb;
+        color: white;
+        width: 100%;
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
     }
 
     .card-aniversariante {
@@ -184,29 +212,14 @@
         box-shadow: 0 2px 6px rgba(0,0,0,.05);
         border-left: 4px solid #f43f5e;
     }
+    .card-aniversariante h3 { margin: 0 0 5px 0; font-size: 16px; }
 
-    .card-aniversariante h3 {
-        margin: 0 0 5px 0;
-        color: #1f2937;
-        font-size: 16px;
-    }
-
-    .card-aniversariante p {
-        margin: 3px 0;
-        color: #4b5563;
-        font-size: 14px;
-    }
-
-    .sem-dados {
-        text-align: center;
-        color: #6b7280;
-        padding: 20px;
-    }
+    .sem-dados { text-align: center; color: #6b7280; padding: 20px; }
 
     @media (max-width: 480px) {
-        body { padding: 10px; }
-        h1 { font-size: 1.5rem; }
         .menu button { padding: 10px 12px; font-size: 14px; }
+        .acoes-barra { flex-direction: column; }
+        .grid-contatos { grid-template-columns: 1fr; gap: 10px; }
     }
 </style>
 </head>
@@ -214,29 +227,90 @@
 
 <div class="container">
 
-    <h1>📚 Agenda Telefônica Escolar</h1>
+    <h1>📚 Agenda Escolar E.M. Ivan Diniz</h1>
 
     <div class="menu">
-        <button id="btnBusca" class="active" onclick="trocarAba('busca')">🔍 Contatos</button>
+        <button id="btnBusca" class="active" onclick="trocarAba('busca')">🔍 Contatos / CRUD</button>
         <button id="btnAniversarios" onclick="trocarAba('aniversarios')">🎂 Aniversariantes da Semana</button>
     </div>
 
+    <!-- ABA 1: BUSCA E FORMULÁRIO EDITÁVEL -->
     <div id="painelBusca">
         <div class="busca">
-            <input
-                type="text"
-                id="pesquisa"
-                placeholder="Digite o nome do aluno..."
-                autocomplete="off">
-            <!-- Novo botão de limpar -->
-            <button id="btnLimpar" class="btn-limpar" onclick="limparBusca()">✕</button>
-
+            <input type="text" id="pesquisa" placeholder="Digite o nome para buscar..." autocomplete="off">
+            <button id="btnLimparCampo" class="btn-limpar" title="Limpar">✕</button>
             <div id="lista" class="autocomplete"></div>
         </div>
 
-        <div id="card" class="card" style="display:none;"></div>
+        <button class="btn-novo" onclick="prepararNovoAluno()">➕ Cadastrar Novo Aluno</button>
+
+        <!-- Formulário Dinâmico de Edição (CREATE / UPDATE / DELETE) -->
+        <div id="card" class="card" style="display:none;">
+            <input type="hidden" id="aluno-id">
+            
+            <div class="grupo-campo">
+                <label class="label-crud">Nome do Aluno</label>
+                <input type="text" id="aluno-nome" class="input-field">
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Turma</label>
+                <input type="text" id="aluno-turma" class="input-field">
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Data de Nascimento (DD/MM/AAAA)</label>
+                <input type="text" id="aluno-nascimento" class="input-field" placeholder="Ex: 24/11/2012">
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Filiação 1</label>
+                <input type="text" id="aluno-filiacao1" class="input-field">
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Telefone Principal</label>
+                <input type="text" id="aluno-telefone" class="input-field">
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Filiação 2</label>
+                <input type="text" id="aluno-filiacao2" class="input-field">
+            </div>
+
+            <!-- Campos Adicionais Mapeados Individualmente -->
+            <div class="grid-contatos">
+                <div class="grupo-campo">
+                    <label class="label-crud">Contato 2</label>
+                    <input type="text" id="aluno-contatos2" class="input-field">
+                </div>
+                <div class="grupo-campo">
+                    <label class="label-crud">Contato 3</label>
+                    <input type="text" id="aluno-contatos3" class="input-field">
+                </div>
+                <div class="grupo-campo">
+                    <label class="label-crud">Contato 4</label>
+                    <input type="text" id="aluno-contatos4" class="input-field">
+                </div>
+                <div class="grupo-campo">
+                    <label class="label-crud">Outro 5</label>
+                    <input type="text" id="aluno-outro5" class="input-field">
+                </div>
+            </div>
+
+            <div class="grupo-campo">
+                <label class="label-crud">Outros 6</label>
+                <input type="text" id="aluno-outros6" class="input-field">
+            </div>
+
+            <div class="acoes-barra">
+                <button class="btn btn-salvar" onclick="salvarAluno()">💾 Salvar Alterações</button>
+                <button id="btnExcluir" class="btn btn-excluir" onclick="excluirAluno()">🗑️ Excluir Aluno</button>
+            </div>
+        </div>
     </div>
 
+    <!-- ABA 2: ANIVERSARIANTES -->
     <div id="painelAniversarios" style="display:none;">
         <div id="listaAniversarios"></div>
     </div>
@@ -244,19 +318,17 @@
 </div>
 
 <script>
-
-let alunos = [];
-
-fetch("contato.json")
-.then(r => r.json())
-.then(dados=>{
-    alunos = dados;
-}).catch(err => console.error("Erro ao carregar contato.json:", err));
+// ==========================================
+// CONFIGURAÇÃO DO SUPABASE
+// ==========================================
+const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const pesquisa = document.getElementById("pesquisa");
 const lista = document.getElementById("lista");
 const card = document.getElementById("card");
-const btnLimpar = document.getElementById("btnLimpar");
+const btnLimparCampo = document.getElementById("btnLimparCampo");
 
 function trocarAba(aba) {
     if (aba === 'busca') {
@@ -269,131 +341,181 @@ function trocarAba(aba) {
         document.getElementById("painelAniversarios").style.display = "block";
         document.getElementById("btnBusca").classList.remove("active");
         document.getElementById("btnAniversarios").classList.add("active");
-        mostrarAniversariantes();
+        renderizarAniversariantes();
     }
 }
 
-// Controla a digitação e a exibição do botão "X"
-pesquisa.addEventListener("input", ()=>{
-    const texto = pesquisa.value.trim().toUpperCase();
+// Autocomplete (Máximo 8 itens)
+pesquisa.addEventListener("input", async () => {
+    const texto = pesquisa.value.trim();
     lista.innerHTML = "";
 
-    // Se tiver texto, mostra o botão X. Se não, esconde.
-    if (pesquisa.value.length > 0) {
-        btnLimpar.style.display = "flex";
-    } else {
-        btnLimpar.style.display = "none";
+    if (texto.length < 2) {
+        btnLimparCampo.style.display = "none";
+        return;
     }
+    btnLimparCampo.style.display = "flex";
 
-    if(texto.length < 2) return;
+    const { data: encontrados, error } = await _supabase
+        .from('alunos')
+        .select('*')
+        .ilike('nome', `%${texto}%`)
+        .limit(8);
 
-    const encontrados = alunos
-        .filter(a => a.nome && a.nome.toUpperCase().includes(texto))
-        .slice(0, 8);
+    if (error) return console.error(error);
 
-    encontrados.forEach(aluno=>{
+    encontrados.forEach(aluno => {
         const div = document.createElement("div");
         div.className = "item";
         div.innerHTML = `
             <div class="nome">${aluno.nome}</div>
-            <div class="turma">Turma ${aluno.turma || 'Não informada'}</div>
+            <div class="turma">Turma ${aluno.turma || 'Não Informada'}</div>
         `;
-
-        div.onclick = ()=>{
-            mostrarAluno(aluno);
+        div.onclick = () => {
+            carregarFormulario(aluno);
             lista.innerHTML = "";
             pesquisa.value = aluno.nome;
         };
-
         lista.appendChild(div);
     });
 });
 
-// Nova Função para limpar tudo
-function limparBusca() {
+btnLimparCampo.addEventListener("click", () => {
     pesquisa.value = "";
     lista.innerHTML = "";
-    card.innerHTML = "";
     card.style.display = "none";
-    btnLimpar.style.display = "none";
-    pesquisa.focus(); // Devolve o foco para o teclado do usuário
-}
+    btnLimparCampo.style.display = "none";
+});
 
-function mostrarAluno(aluno){
-    const outros = [];
+document.addEventListener("click", e => {
+    if (!lista.contains(e.target) && e.target !== pesquisa) lista.innerHTML = "";
+});
 
-    Object.keys(aluno).forEach(chave => {
-        const nome = chave.toLowerCase();
-        if (nome.includes("contato") || nome.includes("outro") || nome.includes("field")) {
-            const valor = aluno[chave];
-            if (valor && valor.trim() !== "") {
-                outros.push(valor);
-            }
-        }
-    });
+// Preencher inputs para Edição (UPDATE)
+function carregarFormulario(aluno) {
+    document.getElementById("aluno-id").value = aluno.id;
+    document.getElementById("aluno-nome").value = aluno.nome || "";
+    document.getElementById("aluno-turma").value = aluno.turma || "";
+    document.getElementById("aluno-nascimento").value = aluno.nascimento || "";
+    document.getElementById("aluno-filiacao1").value = aluno.filiacao1 || "";
+    document.getElementById("aluno-telefone").value = aluno.telefone || "";
+    document.getElementById("aluno-filiacao2").value = aluno.filiacao2 || "";
+    
+    // Novos campos individuais carregados diretamente
+    document.getElementById("aluno-contatos2").value = aluno.contatos2 || "";
+    document.getElementById("aluno-contatos3").value = aluno.contatos3 || "";
+    document.getElementById("aluno-contatos4").value = aluno.contatos4 || "";
+    document.getElementById("aluno-outro5").value = aluno.outro5 || "";
+    document.getElementById("aluno-outros6").value = aluno.outros6 || "";
 
-    let listaOutros = "";
-    if(outros.length){
-        listaOutros = `
-            <div class="linha">
-                <div class="titulo">Outros contatos</div>
-                <ul>
-                    ${outros.map(c=>`<li>${c}</li>`).join("")}
-                </ul>
-            </div>
-        `;
-    }
-
-    card.innerHTML = `
-        <div class="linha">
-            <div class="titulo">Aluno</div>
-            ${aluno.nome}
-        </div>
-        <div class="linha">
-            <div class="titulo">Turma</div>
-            ${aluno.turma || "-"}
-        </div>
-        <div class="linha">
-            <div class="titulo">Filiação 1</div>
-            ${aluno.filiação1 || "-"}<br>
-            📞 ${aluno.telefone || "-"}
-        </div>
-        <div class="linha">
-            <div class="titulo">Filiação 2</div>
-            ${aluno.filiação2 || "-"}
-        </div>
-        ${listaOutros}
-    `;
+    document.getElementById("btnExcluir").style.display = "block";
     card.style.display = "block";
 }
 
-document.addEventListener("click", e=>{
-    if(!lista.contains(e.target) && e.target !== pesquisa && e.target !== btnLimpar){
-        lista.innerHTML = "";
-    }
-});
+// Limpar inputs para Criação (CREATE)
+function prepararNovoAluno() {
+    document.getElementById("aluno-id").value = "";
+    document.getElementById("aluno-nome").value = "";
+    document.getElementById("aluno-turma").value = "";
+    document.getElementById("aluno-nascimento").value = "";
+    document.getElementById("aluno-filiacao1").value = "";
+    document.getElementById("aluno-telefone").value = "";
+    document.getElementById("aluno-filiacao2").value = "";
+    document.getElementById("aluno-contatos2").value = "";
+    document.getElementById("aluno-contatos3").value = "";
+    document.getElementById("aluno-contatos4").value = "";
+    document.getElementById("aluno-outro5").value = "";
+    document.getElementById("aluno-outros6").value = "";
+    
+    document.getElementById("btnExcluir").style.display = "none";
+    card.style.display = "block";
+    document.getElementById("aluno-nome").focus();
+}
 
-function mostrarAniversariantes(){
+// Salvar / Atualizar Dados
+async function salvarAluno() {
+    const id = document.getElementById("aluno-id").value;
+    const nome = document.getElementById("aluno-nome").value.trim();
+    
+    if (!nome) return alert("O campo Nome é obrigatório!");
+
+    const payload = {
+        nome: nome,
+        turma: document.getElementById("aluno-turma").value.trim(),
+        nascimento: document.getElementById("aluno-nascimento").value.trim(),
+        filiacao1: document.getElementById("aluno-filiacao1").value.trim(),
+        telefone: document.getElementById("aluno-telefone").value.trim(),
+        filiacao2: document.getElementById("aluno-filiacao2").value.trim(),
+        contatos2: document.getElementById("aluno-contatos2").value.trim(),
+        contatos3: document.getElementById("aluno-contatos3").value.trim(),
+        contatos4: document.getElementById("aluno-contatos4").value.trim(),
+        outro5: document.getElementById("aluno-outro5").value.trim(),
+        outros6: document.getElementById("aluno-outros6").value.trim()
+    };
+
+    let resposta;
+
+    if (id) {
+        resposta = await _supabase.from('alunos').update(payload).eq('id', id);
+    } else {
+        resposta = await _supabase.from('alunos').insert([payload]);
+    }
+
+    if (resposta.error) {
+        alert("Erro ao salvar dados: " + resposta.error.message);
+    } else {
+        alert("Dados salvos com sucesso!");
+        card.style.display = "none";
+        pesquisa.value = "";
+        btnLimparCampo.style.display = "none";
+    }
+}
+
+// Remover Aluno
+async function excluirAluno() {
+    const id = document.getElementById("aluno-id").value;
+    const nome = document.getElementById("aluno-nome").value;
+    
+    if (!id) return;
+
+    if (confirm(`Tem certeza que deseja remover a ficha de ${nome}?`)) {
+        const { error } = await _supabase.from('alunos').delete().eq('id', id);
+        
+        if (error) {
+            alert("Erro ao excluir: " + error.message);
+        } else {
+            alert("Aluno removido com sucesso.");
+            card.style.display = "none";
+            pesquisa.value = "";
+            btnLimparCampo.style.display = "none";
+        }
+    }
+}
+
+// Renderizar Aniversariantes da Semana
+async function renderizarAniversariantes(){
     const div = document.getElementById("listaAniversarios");
-    div.innerHTML = "";
+    div.innerHTML = "<div class='sem-dados'>Buscando aniversariantes da semana...</div>";
+
+    const { data: todosAlunos, error } = await _supabase.from('alunos').select('*');
+    if (error) return div.innerHTML = "<div class='sem-dados'>Erro ao carregar aniversários.</div>";
 
     const hoje = new Date();
     const diaDaSemana = hoje.getDay(); 
     const inicioSemana = new Date(hoje);
     inicioSemana.setDate(hoje.getDate() - diaDaSemana);
-    
     const fimSemana = new Date(inicioSemana);
     fimSemana.setDate(inicioSemana.getDate() + 6);
 
-    const aniversariantes = alunos.filter(a=>{
-        if(!a.nascimento) return false;
-
+    const aniversariantes = todosAlunos.filter(a => {
+        if (!a.nascimento) return false;
         const partes = a.nascimento.split("/");
+        if(partes.length < 2) return false;
+        
         const diaNasc = parseInt(partes[0], 10);
         const mesNasc = parseInt(partes[1], 10) - 1;
 
         const dataNascEsteAno = new Date(hoje.getFullYear(), mesNasc, diaNasc);
-
         inicioSemana.setHours(0,0,0,0);
         fimSemana.setHours(23,59,59,999);
         dataNascEsteAno.setHours(12,0,0,0); 
@@ -410,11 +532,10 @@ function mostrarAniversariantes(){
         <div class="card-aniversariante">
             <h3>🎉 ${a.nome}</h3>
             <p><strong>Turma:</strong> ${a.turma || 'Não informada'}</p>
-            <p><strong>Data:</strong> ${a.nascimento.substring(0,5)}</p>
+            <p><strong>Aniversário em:</strong> ${a.nascimento.substring(0,5)}</p>
         </div>
     `).join("");
 }
 </script>
-
 </body>
 </html>
