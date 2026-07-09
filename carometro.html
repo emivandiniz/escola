@@ -405,20 +405,38 @@
        // Substitua a sua função carregarTurmas existente por esta:
 async function carregarTurmas() {
     const select = document.getElementById("select-turmas");
-    select.innerHTML = '<option value="">Carregando turmas...</option>';
+    
+    console.log("Tentando conectar ao Supabase...");
+    
+    const { data, error } = await supabaseClient
+        .from('carometro')
+        .select('class_name');
 
-    try {
-        // Buscamos todas as colunas class_name e ordenamos
-        const { data, error } = await supabaseClient
-            .from('carometro')
-            .select('class_name');
+    if (error) {
+        console.error("ERRO DO SUPABASE:", error);
+        alert("Erro no banco de dados! Olhe o console (F12) para ver o motivo.");
+        return;
+    }
 
-        if (error) throw error;
+    console.log("Dados recebidos do banco:", data);
 
-        if (!data || data.length === 0) {
-            select.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
-            return;
+    if (!data || data.length === 0) {
+        console.warn("A consulta retornou vazia. A tabela está sem dados?");
+        select.innerHTML = '<option value="">Tabela vazia ou sem registros</option>';
+        return;
+    }
+
+    // Apenas para listar no console o que ele encontrou
+    const turmas = [...new Set(data.map(item => item.class_name))];
+    console.log("Turmas encontradas:", turmas);
+
+    select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
+    turmas.forEach(turma => {
+        if(turma) {
+            select.innerHTML += `<option value="${turma}">${turma}</option>`;
         }
+    });
+}
 
         // Filtra valores nulos, remove duplicatas e ordena
         const turmasUnicas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
