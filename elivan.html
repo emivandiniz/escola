@@ -7,140 +7,215 @@
 
 <style>
     *{
-        box-sizing:border-box;
-        font-family:Segoe UI, Arial, sans-serif;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Arial, sans-serif;
     }
 
     body{
-        background:#f3f5f9;
-        margin:0;
-        padding:30px;
+        background: #f3f5f9;
+        margin: 0;
+        padding: 15px; /* Reduzido para telas menores */
     }
 
     .container{
-        max-width:800px;
-        margin:auto;
+        max-width: 800px;
+        margin: auto;
+        padding-top: 15px;
     }
 
     h1{
-        text-align:center;
-        color:#1f2937;
-        margin-bottom:30px;
+        text-align: center;
+        color: #1f2937;
+        margin-bottom: 25px;
+        font-size: 1.8rem;
+    }
+
+    /* Abas Estilizadas */
+    .menu{
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+    }
+
+    .menu button{
+        flex: 1; /* Faz os botões ocuparem espaço igual no celular */
+        border: none;
+        background: #e5e7eb;
+        color: #4b5563;
+        padding: 12px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .menu button.active {
+        background: #2563eb;
+        color: white;
     }
 
     .busca{
-        position:relative;
+        position: relative;
     }
 
     input{
-        width:100%;
-        padding:15px;
-        border:none;
-        border-radius:12px;
-        font-size:16px;
-        box-shadow:0 2px 8px rgba(0,0,0,.1);
+        width: 100%;
+        padding: 15px;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        outline: none;
+        transition: border 0.2s;
+    }
+
+    input:focus {
+        border-color: #2563eb;
     }
 
     .autocomplete{
-        position:absolute;
-        width:100%;
-        background:white;
-        border-radius:12px;
-        overflow:hidden;
-        margin-top:5px;
-        box-shadow:0 5px 15px rgba(0,0,0,.15);
-        z-index:999;
+        position: absolute;
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 5px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.15);
+        z-index: 999;
     }
 
     .item{
-        padding:12px;
-        cursor:pointer;
-        border-bottom:1px solid #eee;
+        padding: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+
+    .item:last-child {
+        border-bottom: none;
     }
 
     .item:hover{
-        background:#f0f4ff;
+        background: #f0f4ff;
     }
 
     .nome{
-        font-weight:bold;
+        font-weight: bold;
+        color: #1f2937;
     }
 
     .turma{
-        color:#666;
-        font-size:14px;
+        color: #6b7280;
+        font-size: 14px;
     }
 
     .card{
-        background:white;
-        margin-top:30px;
-        padding:25px;
-        border-radius:18px;
-        box-shadow:0 5px 20px rgba(0,0,0,.1);
-        display:none;
+        background: white;
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
     }
 
     .linha{
-        margin-bottom:15px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .linha:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
     }
 
     .titulo{
-        font-weight:bold;
-        color:#2563eb;
+        font-weight: bold;
+        color: #2563eb;
+        margin-bottom: 4px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     ul{
-        margin-top:8px;
-        padding-left:20px;
+        margin-top: 8px;
+        padding-left: 20px;
     }
 
     li{
-        margin-bottom:5px;
+        margin-bottom: 5px;
+        color: #374151;
     }
-   .menu{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-}
 
-.menu button{
-    border:none;
-    background:#2563eb;
-    color:white;
-    padding:10px 20px;
-    border-radius:10px;
-    cursor:pointer;
-}
+    /* Estilos para a lista de aniversários */
+    .card-aniversariante {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.05);
+        border-left: 4px solid #f43f5e;
+    }
+
+    .card-aniversariante h3 {
+        margin: 0 0 5px 0;
+        color: #1f2937;
+        font-size: 16px;
+    }
+
+    .card-aniversariante p {
+        margin: 3px 0;
+        color: #4b5563;
+        font-size: 14px;
+    }
+
+    .sem-dados {
+        text-align: center;
+        color: #6b7280;
+        padding: 20px;
+    }
+
+    /* Media Query para Responsividade em telas bem pequenas */
+    @media (max-width: 480px) {
+        body { padding: 10px; }
+        h1 { font-size: 1.5rem; }
+        .menu button { padding: 10px 12px; font-size: 14px; }
+    }
 </style>
 </head>
 <body>
-<div class="menu">
-    <button onclick="mostrarBusca()">Agenda</button>
-    <button onclick="mostrarAniversariantes()">🎂 Aniversariantes</button>
-</div>
 
-<div id="painelBusca">
-    <!-- busca e card -->
-</div>
-
-<div id="painelAniversarios" style="display:none;">
-    <div id="listaAniversarios"></div>
-</div>
 <div class="container">
 
     <h1>📚 Agenda Telefônica Escolar</h1>
 
-    <div class="busca">
-        <input
-            type="text"
-            id="pesquisa"
-            placeholder="Digite o nome do aluno..."
-            autocomplete="off">
-
-        <div id="lista" class="autocomplete"></div>
+    <!-- Abas de Navegação -->
+    <div class="menu">
+        <button id="btnBusca" class="active" onclick="trocarAba('busca')">🔍 Contatos</button>
+        <button id="btnAniversarios" onclick="trocarAba('aniversarios')">🎂 Aniversariantes da Semana</button>
     </div>
 
-    <div id="card" class="card"></div>
+    <!-- Conteúdo da Aba 1: Busca e Agenda -->
+    <div id="painelBusca">
+        <div class="busca">
+            <input
+                type="text"
+                id="pesquisa"
+                placeholder="Digite o nome do aluno..."
+                autocomplete="off">
+
+            <div id="lista" class="autocomplete"></div>
+        </div>
+
+        <div id="card" class="card" style="display:none;"></div>
+    </div>
+
+    <!-- Conteúdo da Aba 2: Aniversariantes -->
+    <div id="painelAniversarios" style="display:none;">
+        <div id="listaAniversarios"></div>
+    </div>
 
 </div>
 
@@ -148,41 +223,51 @@
 
 let alunos = [];
 
+// Carrega os dados do arquivo JSON
 fetch("contato.json")
 .then(r => r.json())
 .then(dados=>{
     alunos = dados;
-});
+}).catch(err => console.error("Erro ao carregar contato.json:", err));
 
 const pesquisa = document.getElementById("pesquisa");
 const lista = document.getElementById("lista");
 const card = document.getElementById("card");
 
+// Controle de troca de Abas
+function trocarAba(aba) {
+    if (aba === 'busca') {
+        document.getElementById("painelBusca").style.display = "block";
+        document.getElementById("painelAniversarios").style.display = "none";
+        document.getElementById("btnBusca").classList.add("active");
+        document.getElementById("btnAniversarios").classList.remove("active");
+    } else {
+        document.getElementById("painelBusca").style.display = "none";
+        document.getElementById("painelAniversarios").style.display = "block";
+        document.getElementById("btnBusca").classList.remove("active");
+        document.getElementById("btnAniversarios").classList.add("active");
+        mostrarAniversariantes();
+    }
+}
+
+// Evento de Input no campo de busca
 pesquisa.addEventListener("input", ()=>{
-
-    const texto = pesquisa.value
-        .trim()
-        .toUpperCase();
-
+    const texto = pesquisa.value.trim().toUpperCase();
     lista.innerHTML = "";
 
     if(texto.length < 2) return;
 
+    // Filtra e limita rigorosamente a 8 resultados
     const encontrados = alunos
-        .filter(a =>
-            a.nome &&
-            a.nome.toUpperCase().includes(texto)
-        )
-        .slice(0,10);
+        .filter(a => a.nome && a.nome.toUpperCase().includes(texto))
+        .slice(0, 8);
 
     encontrados.forEach(aluno=>{
-
         const div = document.createElement("div");
         div.className = "item";
-
         div.innerHTML = `
             <div class="nome">${aluno.nome}</div>
-            <div class="turma">Turma ${aluno.turma}</div>
+            <div class="turma">Turma ${aluno.turma || 'Não informada'}</div>
         `;
 
         div.onclick = ()=>{
@@ -193,120 +278,113 @@ pesquisa.addEventListener("input", ()=>{
 
         lista.appendChild(div);
     });
-
 });
 
+// Renderiza as informações detalhadas do Aluno
 function mostrarAluno(aluno){
-
     const outros = [];
 
-Object.keys(aluno).forEach(chave => {
-    const nome = chave.toLowerCase();
-
-    if (
-        nome.includes("contato") ||
-        nome.includes("outro") ||
-        nome.includes("field")
-    ) {
-        const valor = aluno[chave];
-
-        if (valor && valor.trim() !== "") {
-            outros.push(valor);
+    Object.keys(aluno).forEach(chave => {
+        const nome = chave.toLowerCase();
+        if (nome.includes("contato") || nome.includes("outro") || nome.includes("field")) {
+            const valor = aluno[chave];
+            if (valor && valor.trim() !== "") {
+                outros.push(valor);
+            }
         }
-    }
-});
+    });
 
     let listaOutros = "";
-
     if(outros.length){
-
         listaOutros = `
             <div class="linha">
                 <div class="titulo">Outros contatos</div>
                 <ul>
-                    ${
-                        outros
-                        .map(c=>`<li>${c}</li>`)
-                        .join("")
-                    }
+                    ${outros.map(c=>`<li>${c}</li>`).join("")}
                 </ul>
             </div>
         `;
     }
 
     card.innerHTML = `
-
         <div class="linha">
             <div class="titulo">Aluno</div>
             ${aluno.nome}
         </div>
-
         <div class="linha">
             <div class="titulo">Turma</div>
-            ${aluno.turma}
+            ${aluno.turma || "-"}
         </div>
-
         <div class="linha">
             <div class="titulo">Filiação 1</div>
             ${aluno.filiação1 || "-"}<br>
             📞 ${aluno.telefone || "-"}
         </div>
-
         <div class="linha">
             <div class="titulo">Filiação 2</div>
             ${aluno.filiação2 || "-"}
         </div>
-
         ${listaOutros}
     `;
-
     card.style.display = "block";
 }
 
+// Fecha a lista de autocomplete se clicar fora dela
 document.addEventListener("click", e=>{
-    if(!lista.contains(e.target) &&
-       e.target !== pesquisa){
+    if(!lista.contains(e.target) && e.target !== pesquisa){
         lista.innerHTML = "";
     }
 });
-   function mostrarBusca(){
-    document.getElementById("painelBusca").style.display = "block";
-    document.getElementById("painelBusca").style.display = "none";
-}
 
+// Função para buscar aniversariantes da SEMANA CORRENTE (de domingo a sábado)
 function mostrarAniversariantes(){
-    document.getElementById("painelBusca").style.display = "block";
-    document.getElementById("painelBusca").style.display = "none";
-    document.getElementById("painelAniversarios").style.display = "block";
+    const div = document.getElementById("listaAniversarios");
+    div.innerHTML = "";
 
     const hoje = new Date();
-    const dia = String(hoje.getDate()).padStart(2,"0");
-    const mes = String(hoje.getMonth()+1).padStart(2,"0");
+    
+    // Calcula o início (domingo) e fim (sábado) da semana atual
+    const diaDaSemana = hoje.getDay(); 
+    const inicioSemana = new Date(hoje);
+    inicioSemana.setDate(hoje.getDate() - diaDaSemana);
+    
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 6);
 
+    // Filtra os alunos que fazem aniversário nessa janela de dias/meses
     const aniversariantes = alunos.filter(a=>{
         if(!a.nascimento) return false;
 
+        // Formato esperado do JSON: "DD/MM/AAAA" ou "DD/MM"
         const partes = a.nascimento.split("/");
-        return partes[0] === dia && partes[1] === mes;
+        const diaNasc = parseInt(partes[0], 10);
+        const mesNasc = parseInt(partes[1], 10) - 1; // Meses no JS vão de 0 a 11
+
+        // Cria uma data fictícia no ano atual para validar o período da semana
+        const dataNascEsteAno = new Date(hoje.getFullYear(), mesNasc, diaNasc);
+
+        // Zera as horas para comparar apenas os dias estruturalmente
+        inicioSemana.setHours(0,0,0,0);
+        fimSemana.setHours(23,59,59,999);
+        dataNascEsteAno.setHours(12,0,0,0); 
+
+        return dataNascEsteAno >= inicioSemana && dataNascEsteAno <= fimSemana;
     });
 
-    const div = document.getElementById("listaAniversarios");
-
     if(aniversariantes.length === 0){
-        div.innerHTML =
-            "<p>Nenhum aniversariante hoje.</p>";
+        div.innerHTML = "<div class='sem-dados'><p>Nenhum aniversariante nesta semana. 📅</p></div>";
         return;
     }
 
+    // Renderiza a lista formatada
     div.innerHTML = aniversariantes.map(a=>`
-        <div class="card">
-            <h3>${a.nome}</h3>
-            <p>Turma ${a.turma}</p>
-            <p>🎂 ${a.nascimento}</p>
+        <div class="card-aniversariante">
+            <h3>🎉 ${a.nome}</h3>
+            <p><strong>Turma:</strong> ${a.turma || 'Não informada'}</p>
+            <p><strong>Data:</strong> ${a.nascimento.substring(0,5)}</p>
         </div>
     `).join("");
 }
-
 </script>
 
 </body>
