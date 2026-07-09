@@ -97,10 +97,35 @@
     li{
         margin-bottom:5px;
     }
+   .menu{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.menu button{
+    border:none;
+    background:#2563eb;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+}
 </style>
 </head>
 <body>
+<div class="menu">
+    <button onclick="mostrarBusca()">Agenda</button>
+    <button onclick="mostrarAniversariantes()">🎂 Aniversariantes</button>
+</div>
 
+<div id="painelBusca">
+    <!-- busca e card -->
+</div>
+
+<div id="painelAniversarios" style="display:none;">
+    <div id="listaAniversarios"></div>
+</div>
 <div class="container">
 
     <h1>📚 Agenda Telefônica Escolar</h1>
@@ -244,6 +269,43 @@ document.addEventListener("click", e=>{
         lista.innerHTML = "";
     }
 });
+   function mostrarBusca(){
+    document.getElementById("painelBusca").style.display = "block";
+    document.getElementById("painelBusca").style.display = "none";
+}
+
+function mostrarAniversariantes(){
+    document.getElementById("painelBusca").style.display = "block";
+    document.getElementById("painelBusca").style.display = "none";
+    document.getElementById("painelAniversarios").style.display = "block";
+
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2,"0");
+    const mes = String(hoje.getMonth()+1).padStart(2,"0");
+
+    const aniversariantes = alunos.filter(a=>{
+        if(!a.nascimento) return false;
+
+        const partes = a.nascimento.split("/");
+        return partes[0] === dia && partes[1] === mes;
+    });
+
+    const div = document.getElementById("listaAniversarios");
+
+    if(aniversariantes.length === 0){
+        div.innerHTML =
+            "<p>Nenhum aniversariante hoje.</p>";
+        return;
+    }
+
+    div.innerHTML = aniversariantes.map(a=>`
+        <div class="card">
+            <h3>${a.nome}</h3>
+            <p>Turma ${a.turma}</p>
+            <p>🎂 ${a.nascimento}</p>
+        </div>
+    `).join("");
+}
 
 </script>
 
