@@ -68,50 +68,94 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let todasAsTurmas = [];
+    let todasAsTurmas = [];
+    let alunoSelecionadoParaUpload = null;
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            await carregarTurmas();
+    document.addEventListener("DOMContentLoaded", async () => {
+        await carregarTurmas();
+        configurarInputsDeArquivo();
+    });
+
+    async function carregarTurmas() {
+        const { data, error } = await supabaseClient.from('carometro').select('class_name');
+        if (error) return console.error("Erro ao carregar turmas:", error);
+        todasAsTurmas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
+    }
+
+    function filtrarTurmasPorAno() {
+        const ano = document.getElementById("select-ano").value;
+        const selectTurmas = document.getElementById("select-turmas");
+        selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>';
+        
+        const filtradas = todasAsTurmas.filter(t => 
+            ano === "EJA" ? t.toUpperCase().includes("EJA") : t.startsWith(ano)
+        );
+        
+        filtradas.forEach(t => {
+            let opt = document.createElement("option");
+            opt.value = t; opt.textContent = t;
+            selectTurmas.appendChild(opt);
         });
+    }
 
-        async function carregarTurmas() {
-            const { data, error } = await supabaseClient.from('carometro').select('class_name');
-            if (error) return console.error(error);
-            todasAsTurmas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
-        }
+    function entrarNaTurma() {
+        const turma = document.getElementById("select-turmas").value;
+        if (!turma) return alert("Selecione uma turma primeiro!");
+        
+        document.getElementById("titulo-turma").innerText = `Carômetro - ${turma}`;
+        document.getElementById("tela-selecao").classList.add("hidden");
+        document.getElementById("tela-carometro").classList.remove("hidden");
+        
+        carregarAlunos(turma);
+    }
 
-        function filtrarTurmasPorAno() {
-            const ano = document.getElementById("select-ano").value;
-            const selectTurmas = document.getElementById("select-turmas");
-            selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>';
+    function voltarParaSelecao() {
+        document.getElementById("tela-carometro").classList.add("hidden");
+        document.getElementById("tela-selecao").classList.remove("hidden");
+    }
+
+    async function carregarAlunos(nomeTurma) {
+        const { data: alunos, error } = await supabaseClient
+            .from('carometro')
+            .select('*')
+            .eq('class_name', nomeTurma)
+            .order('student_name');
+
+        if (error) return alert("Erro ao carregar alunos: " + error.message);
+
+        const grid = document.getElementById("grid-alunos");
+        grid.innerHTML = "";
+
+        alunos.forEach(aluno => {
+            const card = document.createElement("div");
+            card.className = "card-aluno";
             
-            const filtradas = todasAsTurmas.filter(t => 
-                ano === "EJA" ? t.toUpperCase().includes("EJA") : t.startsWith(ano)
-            );
-            
-            filtradas.forEach(t => {
-                let opt = document.createElement("option");
-                opt.value = t; opt.textContent = t;
-                selectTurmas.appendChild(opt);
-            });
-        }
+            let areaFoto = aluno.photo_url 
+                ? `<div class="container-foto foto-preenchida"><img src="${aluno.photo_url}" class="foto-img"></div>`
+                : `<div class="container-foto foto-vazia"><i class="fa-solid fa-user"></i></div>`;
 
-        function entrarNaTurma() {
-            const turma = document.getElementById("select-turmas").value;
-            if (!turma) return alert("Selecione uma turma!");
-            document.getElementById("tela-selecao").classList.add("hidden");
-            document.getElementById("tela-carometro").classList.remove("hidden");
-            // Chamar função de carregar alunos aqui...
-        }
+            card.innerHTML = `
+                <div class="flex-col w-full" style="display: flex; align-items: center;">
+                    ${areaFoto}
+                    <h4 class="nome-aluno">${aluno.student_name}</h4>
+                </div>
+                <div class="acoes-container">
+                    ${aluno.photo_url ? 
+                        `<button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600"><i class="fa-solid fa-magnifying-glass"></i></button>` : 
+                        `<button onclick="iniciarUpload('${aluno.id}')" class="btn-acao bg-purple-600"><i class="fa-solid fa-camera"></i></button>`
+                    }
+                </div>`;
+            grid.appendChild(card);
+        });
+    }
 
-        function voltarParaSelecao() {
-            document.getElementById("tela-carometro").classList.add("hidden");
-            document.getElementById("tela-selecao").classList.remove("hidden");
-        }
-    </script>
+    function configurarInputsDeArquivo() {
+        // Mantenha aqui a sua função de upload que já funcionava
+    }
+</script>
 </body>
 </html>
