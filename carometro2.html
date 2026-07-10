@@ -220,50 +220,48 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         const file = evento.target.files[0];
         if (!file || !alunoSelecionadoParaUpload) return;
 
-        // --- INÍCIO DA COMPACTAÇÃO ---
-        // Mostra um aviso rápido para o usuário saber que está processando
-        console.log("Compactando imagem...");
+        console.log("Iniciando processo...");
 
         new Compressor(file, {
-            quality: 0.6,      // 60% de qualidade (reduz o peso drasticamente sem perder nitidez)
-            maxWidth: 800,     // Largura máxima de 800px (ideal para avatares)
-            maxHeight: 800,    // Altura máxima de 800px
-            convertSize: 1000000, // Converte PNG pesado para JPEG se passar de 1MB
-
+            quality: 0.6,
+            maxWidth: 800,
+            maxHeight: 800,
             success: async (resultadoCompactado) => {
-                // O 'resultadoCompactado' é a foto já leve! Agora fazemos o upload normal.
-                
-                const fileExt = resultadoCompactado.name ? resultadoCompactado.name.split('.').pop() : 'jpg';
+                const fileExt = 'jpg';
                 const caminhoArquivo = `public/${alunoSelecionadoParaUpload}-${Date.now()}.${fileExt}`;
 
-                // Upload para o Bucket "fotos-alunos"
-                const { data, error: storageError } = await supabaseClient.storage
+                // 1. Upload
+                const { data: uploadData, error: storageError } = await supabaseClient.storage
                     .from('fotos-alunos')
                     .upload(caminhoArquivo, resultadoCompactado);
 
-                if (storageError) return alert("Erro no upload do storage: " + storageError.message);
+                if (storageError) return alert("Erro no Storage: " + storageError.message);
+                console.log("Upload concluído!");
 
+                // 2. Gerar URL
                 const { data: { publicUrl } } = supabaseClient.storage.from('fotos-alunos').getPublicUrl(caminhoArquivo);
+                console.log("URL gerada:", publicUrl);
 
-                // Salvando o link na coluna photo_url da tabela carometro
-                const { error: dbError } = await supabaseClient
+                // 3. Update no Banco com log de erro
+                const { data, error: dbError } = await supabaseClient
                     .from('carometro')
                     .update({ photo_url: publicUrl })
                     .eq('id', alunoSelecionadoParaUpload);
 
-                if (dbError) return alert("Erro ao vincular imagem: " + dbError.message);
-
-                evento.target.value = "";
-                const turmaAtual = document.getElementById("select-turmas").value;
-                carregarAlunos(turmaAtual);
-                
-                
+                if (dbError) {
+                    console.error("Erro detalhado do banco:", dbError);
+                    alert("Erro ao salvar no banco: " + dbError.message);
+                } else {
+                    console.log("Banco atualizado com sucesso!");
+                    evento.target.value = "";
+                    const turmaAtual = document.getElementById("select-turmas").value;
+                    carregarAlunos(turmaAtual);
+                }
             },
             error(err) {
-                alert("Erro ao compactar a imagem: " + err.message);
+                alert("Erro na compactação: " + err.message);
             },
         });
-        // --- FIM DA COMPACTAÇÃO ---
     };
 
     document.getElementById("input-camera").addEventListener("change", processarArquivo);
