@@ -13,19 +13,46 @@
 <body class="bg-gray-100 min-h-screen text-gray-800">
 
     <div id="tela-selecao" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-200">
-            <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Selecione a Turma</h2>
-            <div class="mb-4">
-                <label class="block text-sm font-semibold mb-2">Turmas disponíveis:</label>
-                <select id="select-turmas" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Carregando turmas...</option>
-                </select>
-            </div>
-            <button onclick="entrarNaTurma()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                Acessar Carômetro
-            </button>
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-200">
+        <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Carômetro Firmo de Mattos</h2>
+        
+        <!-- Seleção de Ano -->
+        <div class="mb-4">
+            <label class="block text-sm font-semibold mb-2">1. Escolha o Ano:</label>
+            <select id="select-ano" class="w-full p-3 border rounded-lg" onchange="carregarTurmasPorAno()">
+                <option value="">Selecione o ano...</option>
+                <option value="3">3º Ano</option>
+                <option value="4">4º Ano</option>
+                <option value="5">5º Ano</option>
+                <option value="6">6º Ano</option>
+                <option value="7">7º Ano</option>
+                <option value="8">8º Ano</option>
+                <option value="9">9º Ano</option>
+                <option value="EJA">EJA</option>
+            </select>
         </div>
+
+        <!-- Seleção de Turma -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold mb-2">2. Escolha a Turma:</label>
+            <select id="select-turmas" class="w-full p-3 border rounded-lg" disabled>
+                <option value="">Selecione o ano primeiro...</option>
+            </select>
+        </div>
+
+        <button id="btn-acessar" onclick="entrarNaTurma()" disabled class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg opacity-50 cursor-not-allowed">
+            Acessar Carômetro
+        </button>
     </div>
+</div>
+
+<!-- Loader global -->
+<div id="loader" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-[100]">
+    <div class="bg-white p-5 rounded-lg flex items-center gap-3">
+        <i class="fa-solid fa-spinner fa-spin text-blue-600 text-2xl"></i>
+        <span class="font-bold">Carregando...</span>
+    </div>
+</div>
 
     <div id="tela-carometro" class="hidden">
         <header class="bg-blue-900 text-white p-6 shadow-md">
@@ -101,35 +128,66 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         });
 
         // Extrai as turmas únicas diretamente da tabela 'carometro'
-        async function carregarTurmas() {
-            const { data, error } = await supabaseClient.from('carometro').select('class_name');
-            if (error) return alert("Erro ao carregar turmas: " + error.message);
+        
+      // Função para mostrar/esconder loader
+            function toggleLoader(mostrar) {
+                document.getElementById("loader").classList.toggle("hidden", !mostrar);
+            }
             
-            // Cria uma lista de nomes de turmas sem repetições
-            const turmasUnicas = [...new Set(data.map(item => item.class_name))].sort();
+            // Carrega turmas filtradas pelo ano escolhido
+            async function carregarTurmasPorAno() {
+                const ano = document.getElementById("select-ano").value;
+                const selectTurmas = document.getElementById("select-turmas");
+                const btnAcessar = document.getElementById("btn-acessar");
             
-            const select = document.getElementById("select-turmas");
-            select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
-
-            turmasUnicas.forEach(turma => {
-                if(turma) {
-                    select.innerHTML += `<option value="${turma}">${turma}</option>`;
+                if (!ano) {
+                    selectTurmas.disabled = true;
+                    btnAcessar.disabled = true;
+                    btnAcessar.classList.add("opacity-50");
+                    return;
                 }
-            });
-        }
-
-        // Avançar para a tela do Carômetro
-        function entrarNaTurma() {
-            const nomeTurma = document.getElementById("select-turmas").value;
-            if (!nomeTurma) return alert("Selecione uma turma para prosseguir!");
             
-            document.getElementById("titulo-turma").innerText = `Carômetro - ${nomeTurma}`;
+                toggleLoader(true);
+                
+                // Busca todas as turmas que contenham o ano (ex: 301, 302...)
+                const { data, error } = await supabaseClient
+                    .from('carometro')
+                    .select('class_name');
             
-            document.getElementById("tela-selecao").classList.add("hidden");
-            document.getElementById("tela-carometro").classList.remove("hidden");
+                if (error) {
+                    console.error(error);
+                    toggleLoader(false);
+                    return;
+                }
             
-            carregarAlunos(nomeTurma);
-        }
+                // Filtra turmas únicas baseado no ano selecionado
+                const turmas = [...new Set(data.map(i => i.class_name))].filter(t => 
+                    ano === "EJA" ? t.toLowerCase().includes("eja") : t.startsWith(ano)
+                ).sort();
+            
+                selectTurmas.innerHTML = '<option value="">Selecione a turma...</option>';
+                turmas.forEach(t => {
+                    selectTurmas.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+            
+                selectTurmas.disabled = false;
+                btnAcessar.disabled = false;
+                btnAcessar.classList.remove("opacity-50");
+                toggleLoader(false);
+            }
+            
+            // Ao clicar em Acessar
+            function entrarNaTurma() {
+                const nomeTurma = document.getElementById("select-turmas").value;
+                if (!nomeTurma) return alert("Selecione uma turma!");
+                
+                toggleLoader(true);
+                document.getElementById("titulo-turma").innerText = `Carômetro - ${nomeTurma}`;
+                document.getElementById("tela-selecao").classList.add("hidden");
+                document.getElementById("tela-carometro").classList.remove("hidden");
+                
+                carregarAlunos(nomeTurma).finally(() => toggleLoader(false));
+            }
 
         function voltarParaSelecao() {
             document.getElementById("tela-carometro").classList.add("hidden");
