@@ -311,19 +311,47 @@
 
     <!-- TELA SELEÇÃO DE TURMAS -->
     <div id="tela-selecao" class="flex-center-container">
-        <div class="card-selecao">
-            <h2 class="titulo-principal">Selecione a Turma</h2>
-            <div style="margin-bottom: 1rem;">
-                <label class="label-form">Turmas disponíveis:</label>
-                <select id="select-turmas" class="select-custom">
-                    <option value="">Carregando turmas...</option>
+    <div class="card-selecao">
+        <h2 class="titulo-principal">Configurar Carômetro</h2>
+        
+        <!-- Novo seletor de Ano/Etapa -->
+        <div style="margin-bottom: 1rem;">
+            <label class="label-form">1. Escolha o Ano/Etapa:</label>
+            <label class="label-form">1. Escolha o Ano/Etapa:</label>
+                <select id="select-ano" class="select-custom" onchange="filtrarTurmasPorAno()">
+                    <option value="">-- Selecione o Ano --</option>
+                    <option value="3">3º Ano</option>
+                    <option value="4">4º Ano</option>
+                    <option value="5">5º Ano</option>
+                    <option value="6">6º Ano</option>
+                    <option value="7">7º Ano</option>
+                    <option value="8">8º Ano</option>
+                    <option value="9">9º Ano</option>
+                    <option value="EJA">EJA</option>
                 </select>
-            </div>
-            <button onclick="entrarNaTurma()" class="btn-primary">
-                Acessar Carômetro
-            </button>
         </div>
+
+        <!-- Seletor de turmas dependente -->
+        <div style="margin-bottom: 1rem;">
+            <label class="label-form">2. Escolha a Turma:</label>
+            <select id="select-turmas" class="select-custom">
+                <option value="">Selecione um ano primeiro...</option>
+            </select>
+        </div>
+
+        <button onclick="entrarNaTurma()" class="btn-primary">Acessar Carômetro</button>
     </div>
+</div>
+    <div style="margin-bottom: 1rem;">
+            <label class="label-form">2. Escolha a Turma:</label>
+            <select id="select-turmas" class="select-custom">
+                <option value="">Selecione um ano primeiro...</option>
+            </select>
+        </div>
+
+        <button onclick="entrarNaTurma()" class="btn-primary">Acessar Carômetro</button>
+    </div>
+</div>
 
     <!-- TELA PRINCIPAL CARÔMETRO -->
     <div id="tela-carometro" class="hidden">
@@ -510,7 +538,46 @@
             grid.appendChild(card);
         });
     }
+// Armazena todas as turmas carregadas inicialmente para filtrar localmente
+let todasAsTurmas = [];
 
+document.addEventListener("DOMContentLoaded", async () => {
+    await carregarTodasAsTurmas(); // Carrega tudo uma vez só
+    configurarInputsDeArquivo();
+});
+
+function filtrarTurmasPorAno() {
+    const anoSelecionado = document.getElementById("select-ano").value;
+    const selectTurmas = document.getElementById("select-turmas");
+    
+    selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>';
+
+    if (!anoSelecionado) return;
+
+    const filtradas = todasAsTurmas.filter(turma => {
+        // Se for EJA, busca pelo texto "EJA"
+        if (anoSelecionado === "EJA") return turma.toUpperCase().includes("EJA");
+        
+        // Se for 3º ao 9º, verifica se a turma começa com o número escolhido
+        // Ex: se escolheu '6', pega todas que começam com '6' (601, 602...)
+        return turma.toString().startsWith(anoSelecionado);
+    });
+
+    filtradas.forEach(turma => {
+        const option = document.createElement("option");
+        option.value = turma;
+        option.textContent = turma;
+        selectTurmas.appendChild(option);
+    });
+}
+
+    filtradas.forEach(turma => {
+        const option = document.createElement("option");
+        option.value = turma;
+        option.textContent = turma;
+        selectTurmas.appendChild(option);
+    });
+}
 </script>
 </body>
 </html>
