@@ -387,112 +387,46 @@
     </div>
 
 <script>
-    // CONFIGURAÇÃO DO SEU SUPABASE
+    // 1. Configurações
     const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
-             
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let alunoSelecionadoParaUpload = null;
 
+    // 2. Inicialização
     document.addEventListener("DOMContentLoaded", async () => {
         await carregarTurmas();
-        configurarInputsDeArquivo();
+        configurarInputsDeArquivo(); // Agora a função existe abaixo
     });
 
-    async function carregarTurmas() {
-        const select = document.getElementById("select-turmas");
-        select.innerHTML = '<option value="">Carregando...</option>';
+    // 3. Função que faltava
+    function configurarInputsDeArquivo() {
+        const processarArquivo = async (evento) => {
+            const file = evento.target.files[0];
+            if (!file || !alunoSelecionadoParaUpload) return;
 
-        const { data, error } = await supabaseClient
-            .from('carometro')
-            .select('class_name');
+            new Compressor(file, {
+                quality: 0.6,
+                maxWidth: 800,
+                maxHeight: 800,
+                success: async (resultado) => {
+                    const caminho = `public/${alunoSelecionadoParaUpload}-${Date.now()}.jpg`;
+                    const { error } = await supabaseClient.storage.from('fotos-alunos').upload(caminho, resultado);
+                    if (error) return alert("Erro no upload: " + error.message);
 
-        if (error) {
-            console.error("ERRO:", error);
-            select.innerHTML = '<option value="">Erro ao carregar</option>';
-            return;
-        }
-
-        if (!data || data.length === 0) {
-            select.innerHTML = '<option value="">Nenhuma turma encontrada</option>';
-            return;
-        }
-
-        // Processa as turmas
-        const turmasUnicas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
-        
-        select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
-        turmasUnicas.forEach(turma => {
-            const option = document.createElement("option");
-            option.value = turma;
-            option.textContent = turma;
-            select.appendChild(option);
-        });
+                    const { data: { publicUrl } } = supabaseClient.storage.from('fotos-alunos').getPublicUrl(caminho);
+                    await supabaseClient.from('carometro').update({ photo_url: publicUrl }).eq('id', alunoSelecionadoParaUpload);
+                    
+                    carregarAlunos(document.getElementById("select-turmas").value);
+                }
+            });
+        };
+        document.getElementById("input-camera").addEventListener("change", processarArquivo);
+        document.getElementById("input-galeria").addEventListener("change", processarArquivo);
     }
 
-    // --- RESTANTE DAS FUNÇÕES (Manter o restante igual ao que você já tinha) ---
-    function entrarNaTurma() {
-        const nomeTurma = document.getElementById("select-turmas").value;
-        if (!nomeTurma) return alert("Selecione uma turma para prosseguir!");
-        document.getElementById("titulo-turma").innerText = `Carômetro - ${nomeTurma}`;
-        document.getElementById("tela-selecao").classList.add("hidden");
-        document.getElementById("tela-carometro").classList.remove("hidden");
-        carregarAlunos(nomeTurma);
-    }
-
-    function voltarParaSelecao() {
-        document.getElementById("tela-carometro").classList.add("hidden");
-        document.getElementById("tela-selecao").classList.remove("hidden");
-    }
-
-    async function carregarAlunos(nomeTurma) {
-        const { data: alunos, error } = await supabaseClient
-            .from('carometro')
-            .select('*')
-            .eq('class_name', nomeTurma)
-            .order('student_name');
-
-        if (error) return alert("Erro ao carregar alunos: " + error.message);
-
-        const total = alunos.length;
-        const comFoto = alunos.filter(a => a.photo_url).length;
-        const semFoto = total - comFoto;
-
-        document.getElementById("meta-total").innerText = total;
-        document.getElementById("meta-com-foto").innerText = comFoto;
-        document.getElementById("meta-sem-foto").innerText = semFoto;
-
-        const grid = document.getElementById("grid-alunos");
-        grid.innerHTML = "";
-
-        alunos.forEach(aluno => {
-            const card = document.createElement("div");
-            card.className = "card-aluno";
-            let areaFoto = aluno.photo_url 
-                ? `<div class="container-foto foto-preenchida"><img src="${aluno.photo_url}" class="foto-img"></div>`
-                : `<div class="container-foto foto-vazia"><i class="fa-solid fa-user icon-user-vazio"></i></div>`;
-
-            let botoesAcao = aluno.photo_url 
-                ? `<button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600"><i class="fa-solid fa-magnifying-glass"></i></button>
-                   <button onclick="removerFoto('${aluno.id}')" class="btn-acao bg-red-500"><i class="fa-solid fa-trash"></i></button>`
-                : `<button onclick="dispararUpload('${aluno.id}', 'camera')" class="btn-acao bg-purple-600"><i class="fa-solid fa-camera"></i></button>
-                   <button onclick="dispararUpload('${aluno.id}', 'galeria')" class="btn-acao bg-blue-500"><i class="fa-solid fa-image"></i></button>`;
-
-            card.innerHTML = `
-                <div class="flex-col w-full" style="display: flex; align-items: center;">
-                    ${areaFoto}
-                    <h4 class="nome-aluno">${aluno.student_name}</h4>
-                </div>
-                <div class="acoes-container">
-                    ${botoesAcao}
-                    <button onclick="abrirModalEdicao('${aluno.id}', '${aluno.student_name}', '${aluno.class_name}')" class="btn-acao bg-cyan-500"><i class="fa-solid fa-pen"></i></button>
-                </div>`;
-            grid.appendChild(card);
-        });
-    }
-
-    // [Manter aqui as funções de dispararUpload, configurarInputsDeArquivo, removerFoto, abrirModalEdicao, salvarEdicaoAluno que você já possui]
+    // 4. Mantenha aqui as suas outras funções (carregarTurmas, carregarAlunos, etc)
+    // ...
 </script>
 </body>
 </html>
