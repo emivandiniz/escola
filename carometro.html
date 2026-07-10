@@ -118,40 +118,56 @@
         document.getElementById("tela-selecao").classList.remove("hidden");
     }
 
-    async function carregarAlunos(nomeTurma) {
-        const { data: alunos, error } = await supabaseClient
-            .from('carometro')
-            .select('*')
-            .eq('class_name', nomeTurma)
-            .order('student_name');
+   async function carregarAlunos(nomeTurma) {
+    const { data: alunos, error } = await supabaseClient
+        .from('carometro')
+        .select('*')
+        .eq('class_name', nomeTurma)
+        .order('student_name');
 
-        if (error) return alert("Erro ao carregar alunos: " + error.message);
+    if (error) return alert("Erro ao carregar alunos: " + error.message);
 
-        const grid = document.getElementById("grid-alunos");
-        grid.innerHTML = "";
+    // --- CÁLCULO DAS MÉTRICAS ---
+    const total = alunos.length;
+    const comFoto = alunos.filter(a => a.photo_url).length;
+    const semFoto = total - comFoto;
 
-        alunos.forEach(aluno => {
-            const card = document.createElement("div");
-            card.className = "card-aluno";
-            
-            let areaFoto = aluno.photo_url 
-                ? `<div class="container-foto foto-preenchida"><img src="${aluno.photo_url}" class="foto-img"></div>`
-                : `<div class="container-foto foto-vazia"><i class="fa-solid fa-user"></i></div>`;
+    document.getElementById("meta-total").innerText = total;
+    document.getElementById("meta-com-foto").innerText = comFoto;
+    document.getElementById("meta-sem-foto").innerText = semFoto;
 
-            card.innerHTML = `
-                <div class="flex-col w-full" style="display: flex; align-items: center;">
-                    ${areaFoto}
-                    <h4 class="nome-aluno">${aluno.student_name}</h4>
-                </div>
-                <div class="acoes-container">
-                    ${aluno.photo_url ? 
-                        `<button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600"><i class="fa-solid fa-magnifying-glass"></i></button>` : 
-                        `<button onclick="iniciarUpload('${aluno.id}')" class="btn-acao bg-purple-600"><i class="fa-solid fa-camera"></i></button>`
-                    }
-                </div>`;
-            grid.appendChild(card);
-        });
-    }
+    // --- MONTAGEM DO GRID ---
+    const grid = document.getElementById("grid-alunos");
+    grid.innerHTML = "";
+
+    alunos.forEach(aluno => {
+        const card = document.createElement("div");
+        card.className = "card-aluno";
+
+        // Define a foto
+        let areaFoto = aluno.photo_url 
+            ? `<div class="container-foto foto-preenchida"><img src="${aluno.photo_url}" class="foto-img"></div>`
+            : `<div class="container-foto foto-vazia"><i class="fa-solid fa-user icon-user-vazio"></i></div>`;
+
+        // Define os botões de ação
+        let botoesAcao = aluno.photo_url 
+            ? `<button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600"><i class="fa-solid fa-magnifying-glass"></i></button>
+               <button onclick="removerFoto('${aluno.id}')" class="btn-acao bg-red-500"><i class="fa-solid fa-trash"></i></button>`
+            : `<button onclick="dispararUpload('${aluno.id}', 'camera')" class="btn-acao bg-purple-600"><i class="fa-solid fa-camera"></i></button>
+               <button onclick="dispararUpload('${aluno.id}', 'galeria')" class="btn-acao bg-blue-500"><i class="fa-solid fa-image"></i></button>`;
+
+        card.innerHTML = `
+            <div class="flex-col w-full" style="display: flex; align-items: center;">
+                ${areaFoto}
+                <h4 class="nome-aluno">${aluno.student_name}</h4>
+            </div>
+            <div class="acoes-container">
+                ${botoesAcao}
+                <button onclick="abrirModalEdicao('${aluno.id}', '${aluno.student_name}', '${aluno.class_name}')" class="btn-acao bg-cyan-500"><i class="fa-solid fa-pen"></i></button>
+            </div>`;
+        grid.appendChild(card);
+    });
+}
 
     function configurarInputsDeArquivo() {
         // Mantenha aqui a sua função de upload que já funcionava
