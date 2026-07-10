@@ -170,12 +170,15 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
                         <i class="fa-solid fa-user text-4xl text-gray-400"></i>
                     </div>`;
                 
-                if (aluno.photo_url) {
-                    areaFoto = `
-                        <div class="w-24 h-24 rounded-full border-2 border-blue-500 overflow-hidden mb-3">
-                            <img src="${aluno.photo_url}" class="w-full h-full object-cover">
-                        </div>`;
-                }
+               if (aluno.photo_url) {
+                        // Adiciona o timestamp (Date.now()) para forçar o navegador a recarregar a imagem
+                        const urlComCache = `${aluno.photo_url}?t=${new Date().getTime()}`;
+                        
+                        areaFoto = `
+                            <div class="w-24 h-24 rounded-full border-2 border-blue-500 overflow-hidden mb-3">
+                                <img src="${urlComCache}" class="w-full h-full object-cover">
+                            </div>`;
+                    }
 
                 // Botões de ação baseados na presença da foto
                 let botoesAcao = "";
