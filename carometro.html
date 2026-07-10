@@ -6,578 +6,112 @@
     <link rel="icon" type="image/svg+xml" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEu6XYfBX6dLECkxfarfPyb2WfE9KQSWr1B8WeCshx2w&s">
     <title>Carômetro Firmo de Mattos</title>
     
-    <!-- Dependências oficiais de Script -->
+    <!-- Dependências -->
     <link rel="stylesheet" href="all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* Estilos Base Replicados do Tailwind */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        body {
-            background-color: #f3f4f6;
-            min-height: 100vh;
-            color: #1f2937;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+        body { background-color: #f3f4f6; min-height: 100vh; color: #1f2937; }
         .hidden { display: none !important; }
-
-        /* Tela de Seleção */
-        .flex-center-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 1rem;
-        }
-
-        .card-selecao {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            width: 100%;
-            max-width: 28rem;
-            border: 1px solid #e5e7eb;
-        }
-
-        .titulo-principal {
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            color: #1e3a8a;
-            margin-bottom: 1.5rem;
-        }
-
-        .label-form {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .select-custom {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            outline: none;
-            font-size: 1rem;
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-
-        .select-custom:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-primary {
-            width: 100%;
-            background-color: #2563eb;
-            color: #ffffff;
-            font-weight: 700;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary:hover { background-color: #1d4ed8; }
-
-        /* Cabeçalho */
-        .header-carometro {
-            background-color: #1e3a8a;
-            color: #ffffff;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            max-width: 80rem;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .header-content {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-
-        .titulo-header { font-size: 1.5rem; font-weight: 700; }
-        .subtitulo-header { color: #bfdbfe; font-size: 0.875rem; }
-
-        .btn-voltar {
-            background-color: #1e40af;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: background-color 0.2s;
-        }
-
-        .btn-voltar:hover { background-color: #1d4ed8; }
-
-        /* Métricas */
-        .main-content {
-            max-width: 80rem;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        @media (min-width: 768px) { .main-content { padding: 1.5rem; } }
-
-        .grid-metricas {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        @media (min-width: 768px) { .grid-metricas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-        .card-metrica {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-        }
-
-        .metrica-num { font-size: 1.875rem; font-weight: 700; }
-        .text-blue-900 { color: #1e3a8a; }
-        .text-green-600 { color: #16a34a; }
-        .text-amber-500 { color: #f59e0b; }
-
-        .metrica-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Grid de Alunos */
-        .grid-alunos {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (min-width: 640px) { .grid-alunos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 768px) { .grid-alunos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { .grid-alunos { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-
-        /* Card Aluno */
-        .card-aluno {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-            min-height: 280px;
-        }
-
-        .container-foto {
-            width: 6rem;
-            height: 6rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-width: 2px;
-            margin-bottom: 0.75rem;
-            overflow: hidden;
-        }
-
-        .foto-vazia { background-color: #e2e8f0; border-color: #d1d5db; }
-        .foto-preenchida { border-color: #3b82f6; }
+        .flex-center-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+        .card-selecao { background-color: #ffffff; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 28rem; border: 1px solid #e5e7eb; }
+        .titulo-principal { font-size: 1.5rem; font-weight: 700; text-align: center; color: #1e3a8a; margin-bottom: 1.5rem; }
+        .label-form { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .select-custom { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; outline: none; font-size: 1rem; margin-bottom: 1rem; }
+        .btn-primary { width: 100%; background-color: #2563eb; color: #ffffff; font-weight: 700; padding: 0.75rem; border-radius: 0.5rem; border: none; cursor: pointer; }
+        
+        /* Estilos do Carômetro (Métricas, Grids, etc) */
+        .header-carometro { background-color: #1e3a8a; color: #ffffff; padding: 1.5rem; }
+        .main-content { max-width: 80rem; margin: 0 auto; padding: 1.5rem; }
+        .grid-alunos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .card-aluno { background: #fff; padding: 1rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center; min-height: 280px; }
+        .container-foto { width: 6rem; height: 6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #3b82f6; overflow: hidden; margin-bottom: 0.75rem; }
         .foto-img { width: 100%; height: 100%; object-fit: cover; }
-
-        .icon-user-vazio { font-size: 2.25rem; color: #9ca3af; }
-
-        .nome-aluno {
-            font-weight: 700;
-            font-size: 0.875rem;
-            color: #172554;
-            text-transform: uppercase;
-            letter-spacing: -0.025em;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            padding-left: 0.25rem;
-            padding-right: 0.25rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .acoes-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            width: 100%;
-        }
-
-        .btn-acao {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 9999px;
-            color: #ffffff;
-            font-size: 0.75rem;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: background-color 0.2s;
-        }
-
-        .bg-green-600 { background-color: #16a34a; } .bg-green-600:hover { background-color: #15803d; }
-        .bg-red-500 { background-color: #ef4444; } .bg-red-500:hover { background-color: #dc2626; }
-        .bg-purple-600 { background-color: #9333ea; } .bg-purple-600:hover { background-color: #7e22ce; }
-        .bg-blue-500 { background-color: #3b82f6; } .bg-blue-500:hover { background-color: #2563eb; }
-        .bg-cyan-500 { background-color: #06b6d4; } .bg-cyan-500:hover { background-color: #0891b2; }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            z-index: 50;
-        }
-
-        .modal-content {
-            background-color: #ffffff;
-            border-radius: 0.75rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            max-width: 28rem;
-            width: 100%;
-            padding: 1.5rem;
-        }
-
-        .modal-titulo { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
-        .space-y-4 > * + * { margin-top: 1rem; }
-        
-        .input-modal {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            outline: none;
-        }
-        .input-modal:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }
-
-        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
-        
-        .btn-cancelar {
-            padding: 0.5rem 1rem;
-            background-color: #e5e7eb;
-            border-radius: 0.5rem;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .btn-cancelar:hover { background-color: #d1d5db; }
+        .btn-acao { width: 2rem; height: 2rem; border-radius: 50%; border: none; color: white; cursor: pointer; margin: 0 0.25rem; }
     </style>
 </head>
 <body>
 
-    <!-- TELA SELEÇÃO DE TURMAS -->
+    <!-- TELA DE SELEÇÃO -->
     <div id="tela-selecao" class="flex-center-container">
-    <div class="card-selecao">
-        <h2 class="titulo-principal">Configurar Carômetro</h2>
-        
-        <!-- Novo seletor de Ano/Etapa -->
-        <div style="margin-bottom: 1rem;">
+        <div class="card-selecao">
+            <h2 class="titulo-principal">Configurar Carômetro</h2>
+            
             <label class="label-form">1. Escolha o Ano/Etapa:</label>
-            <label class="label-form">1. Escolha o Ano/Etapa:</label>
-                <select id="select-ano" class="select-custom" onchange="filtrarTurmasPorAno()">
-                    <option value="">-- Selecione o Ano --</option>
-                    <option value="3">3º Ano</option>
-                    <option value="4">4º Ano</option>
-                    <option value="5">5º Ano</option>
-                    <option value="6">6º Ano</option>
-                    <option value="7">7º Ano</option>
-                    <option value="8">8º Ano</option>
-                    <option value="9">9º Ano</option>
-                    <option value="EJA">EJA</option>
-                </select>
-        </div>
+            <select id="select-ano" class="select-custom" onchange="filtrarTurmasPorAno()">
+                <option value="">-- Selecione o Ano --</option>
+                <option value="3">3º Ano</option><option value="4">4º Ano</option><option value="5">5º Ano</option>
+                <option value="6">6º Ano</option><option value="7">7º Ano</option><option value="8">8º Ano</option>
+                <option value="9">9º Ano</option><option value="EJA">EJA</option>
+            </select>
 
-        <!-- Seletor de turmas dependente -->
-        <div style="margin-bottom: 1rem;">
             <label class="label-form">2. Escolha a Turma:</label>
             <select id="select-turmas" class="select-custom">
                 <option value="">Selecione um ano primeiro...</option>
             </select>
+
+            <button onclick="entrarNaTurma()" class="btn-primary">Acessar Carômetro</button>
         </div>
-
-        <button onclick="entrarNaTurma()" class="btn-primary">Acessar Carômetro</button>
     </div>
-</div>
-    <div style="margin-bottom: 1rem;">
-            <label class="label-form">2. Escolha a Turma:</label>
-            <select id="select-turmas" class="select-custom">
-                <option value="">Selecione um ano primeiro...</option>
-            </select>
-        </div>
 
-        <button onclick="entrarNaTurma()" class="btn-primary">Acessar Carômetro</button>
-    </div>
-</div>
-
-    <!-- TELA PRINCIPAL CARÔMETRO -->
+    <!-- TELA CARÔMETRO -->
     <div id="tela-carometro" class="hidden">
         <header class="header-carometro">
-            <div class="header-content">
-                <div>
-                    <h1 id="titulo-turma" class="titulo-header">Carômetro</h1>
-                    <p class="subtitulo-header">Gerencie as fotos dos alunos</p>
-                </div>
-                <button onclick="voltarParaSelecao()" class="btn-voltar">
-                    <i class="fa-solid fa-arrow-left" style="margin-right: 0.5rem;"></i> Voltar
-                </button>
-            </div>
+            <h1 id="titulo-turma">Carômetro</h1>
+            <button onclick="voltarParaSelecao()">Voltar</button>
         </header>
-
         <main class="main-content">
-            <!-- Métricas -->
-            <div class="grid-metricas">
-                <div class="card-metrica">
-                    <p id="meta-total" class="metrica-num text-blue-900">0</p>
-                    <p class="metrica-label">Total de Alunos</p>
-                </div>
-                <div class="card-metrica">
-                    <p id="meta-com-foto" class="metrica-num text-green-600">0</p>
-                    <p class="metrica-label">Com Foto</p>
-                </div>
-                <div class="card-metrica">
-                    <p id="meta-sem-foto" class="metrica-num text-amber-500">0</p>
-                    <p class="metrica-label">Sem Foto</p>
-                </div>
-            </div>
-
-            <!-- Grid de Alunos -->
             <div id="grid-alunos" class="grid-alunos"></div>
         </main>
     </div>
 
-    <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden">
-    <input type="file" id="input-galeria" accept="image/*" class="hidden">
+    <script>
+        const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <!-- MODAL DE EDIÇÃO -->
-    <div id="modal-edicao" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3 class="modal-titulo">Editar Aluno</h3>
-            <input type="hidden" id="edit-aluno-id">
-            <div class="space-y-4">
-                <div>
-                    <label class="label-form">Nome do Aluno</label>
-                    <input type="text" id="edit-nome" class="input-modal">
-                </div>
-                <div>
-                    <label class="label-form">Nome da Turma</label>
-                    <input type="text" id="edit-turma" class="input-modal">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
-                <button onclick="salvarEdicaoAluno()" class="btn-primary" style="width: auto;">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
+        let todasAsTurmas = [];
 
-<script>
-    // CONFIGURAÇÃO DO SEU SUPABASE
-    const SUPABASE_URL = "https://mzktaliyfwshlgqweyin.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16a3RhbGl5ZndzaGxncXdleWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTYyOTcsImV4cCI6MjA5OTE5MjI5N30.ALLgFwlyMJVkEwaMxjWhXLbOakweL6xlXzUOEalpzDM";
-             
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let alunoSelecionadoParaUpload = null;
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await carregarTurmas();
-        configurarInputsDeArquivo();
-    });
-
-   async function carregarTurmas() {
-    const select = document.getElementById("select-turmas");
-    select.innerHTML = '<option value="">Buscando no banco...</option>';
-
-    console.log("--- DEBUG CARÔMETRO ---");
-
-    try {
-        // Tenta buscar apenas 1 registro para testar a conexão e o nome da tabela
-        const { data, error } = await supabaseClient
-            .from('carometro')
-            .select('class_name')
-            .limit(100);
-
-        if (error) {
-            console.error("ERRO DO SUPABASE:", error.message);
-            select.innerHTML = '<option value="">Erro no banco: ' + error.code + '</option>';
-            return;
-        }
-
-        console.log("Dados brutos recebidos:", data);
-
-        if (!data || data.length === 0) {
-            console.warn("A consulta retornou vazia. Verifique se há dados na tabela 'carometro'.");
-            select.innerHTML = '<option value="">Tabela sem dados</option>';
-            return;
-        }
-
-        // Verifica se a propriedade class_name realmente existe nos dados
-        if (!data[0].hasOwnProperty('class_name')) {
-            console.error("ERRO: A coluna 'class_name' não foi encontrada. As colunas são:", Object.keys(data[0]));
-            select.innerHTML = '<option value="">Erro na coluna</option>';
-            return;
-        }
-
-        const turmasUnicas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
-        
-        select.innerHTML = '<option value="">-- Escolha uma Turma --</option>';
-        turmasUnicas.forEach(turma => {
-            const option = document.createElement("option");
-            option.value = turma;
-            option.textContent = turma;
-            select.appendChild(option);
+        document.addEventListener("DOMContentLoaded", async () => {
+            await carregarTurmas();
         });
 
-        console.log("Turmas carregadas com sucesso:", turmasUnicas);
+        async function carregarTurmas() {
+            const { data, error } = await supabaseClient.from('carometro').select('class_name');
+            if (error) return console.error(error);
+            todasAsTurmas = [...new Set(data.map(item => item.class_name).filter(Boolean))].sort();
+        }
 
-    } catch (err) {
-        console.error("Erro inesperado na função:", err);
-    }
-}
-    // --- RESTANTE DAS FUNÇÕES (Manter o restante igual ao que você já tinha) ---
-    function entrarNaTurma() {
-        const nomeTurma = document.getElementById("select-turmas").value;
-        if (!nomeTurma) return alert("Selecione uma turma para prosseguir!");
-        document.getElementById("titulo-turma").innerText = `Carômetro - ${nomeTurma}`;
-        document.getElementById("tela-selecao").classList.add("hidden");
-        document.getElementById("tela-carometro").classList.remove("hidden");
-        carregarAlunos(nomeTurma);
-    }
+        function filtrarTurmasPorAno() {
+            const ano = document.getElementById("select-ano").value;
+            const selectTurmas = document.getElementById("select-turmas");
+            selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>';
+            
+            const filtradas = todasAsTurmas.filter(t => 
+                ano === "EJA" ? t.toUpperCase().includes("EJA") : t.startsWith(ano)
+            );
+            
+            filtradas.forEach(t => {
+                let opt = document.createElement("option");
+                opt.value = t; opt.textContent = t;
+                selectTurmas.appendChild(opt);
+            });
+        }
 
-    function voltarParaSelecao() {
-        document.getElementById("tela-carometro").classList.add("hidden");
-        document.getElementById("tela-selecao").classList.remove("hidden");
-    }
+        function entrarNaTurma() {
+            const turma = document.getElementById("select-turmas").value;
+            if (!turma) return alert("Selecione uma turma!");
+            document.getElementById("tela-selecao").classList.add("hidden");
+            document.getElementById("tela-carometro").classList.remove("hidden");
+            // Chamar função de carregar alunos aqui...
+        }
 
-    async function carregarAlunos(nomeTurma) {
-        const { data: alunos, error } = await supabaseClient
-            .from('carometro')
-            .select('*')
-            .eq('class_name', nomeTurma)
-            .order('student_name');
-
-        if (error) return alert("Erro ao carregar alunos: " + error.message);
-
-        const total = alunos.length;
-        const comFoto = alunos.filter(a => a.photo_url).length;
-        const semFoto = total - comFoto;
-
-        document.getElementById("meta-total").innerText = total;
-        document.getElementById("meta-com-foto").innerText = comFoto;
-        document.getElementById("meta-sem-foto").innerText = semFoto;
-
-        const grid = document.getElementById("grid-alunos");
-        grid.innerHTML = "";
-
-        alunos.forEach(aluno => {
-            const card = document.createElement("div");
-            card.className = "card-aluno";
-            let areaFoto = aluno.photo_url 
-                ? `<div class="container-foto foto-preenchida"><img src="${aluno.photo_url}" class="foto-img"></div>`
-                : `<div class="container-foto foto-vazia"><i class="fa-solid fa-user icon-user-vazio"></i></div>`;
-
-            let botoesAcao = aluno.photo_url 
-                ? `<button onclick="window.open('${aluno.photo_url}', '_blank')" class="btn-acao bg-green-600"><i class="fa-solid fa-magnifying-glass"></i></button>
-                   <button onclick="removerFoto('${aluno.id}')" class="btn-acao bg-red-500"><i class="fa-solid fa-trash"></i></button>`
-                : `<button onclick="dispararUpload('${aluno.id}', 'camera')" class="btn-acao bg-purple-600"><i class="fa-solid fa-camera"></i></button>
-                   <button onclick="dispararUpload('${aluno.id}', 'galeria')" class="btn-acao bg-blue-500"><i class="fa-solid fa-image"></i></button>`;
-
-            card.innerHTML = `
-                <div class="flex-col w-full" style="display: flex; align-items: center;">
-                    ${areaFoto}
-                    <h4 class="nome-aluno">${aluno.student_name}</h4>
-                </div>
-                <div class="acoes-container">
-                    ${botoesAcao}
-                    <button onclick="abrirModalEdicao('${aluno.id}', '${aluno.student_name}', '${aluno.class_name}')" class="btn-acao bg-cyan-500"><i class="fa-solid fa-pen"></i></button>
-                </div>`;
-            grid.appendChild(card);
-        });
-    }
-// Armazena todas as turmas carregadas inicialmente para filtrar localmente
-let todasAsTurmas = [];
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await carregarTodasAsTurmas(); // Carrega tudo uma vez só
-    configurarInputsDeArquivo();
-});
-
-function filtrarTurmasPorAno() {
-    const anoSelecionado = document.getElementById("select-ano").value;
-    const selectTurmas = document.getElementById("select-turmas");
-    
-    selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>';
-
-    if (!anoSelecionado) return;
-
-    const filtradas = todasAsTurmas.filter(turma => {
-        // Se for EJA, busca pelo texto "EJA"
-        if (anoSelecionado === "EJA") return turma.toUpperCase().includes("EJA");
-        
-        // Se for 3º ao 9º, verifica se a turma começa com o número escolhido
-        // Ex: se escolheu '6', pega todas que começam com '6' (601, 602...)
-        return turma.toString().startsWith(anoSelecionado);
-    });
-
-    filtradas.forEach(turma => {
-        const option = document.createElement("option");
-        option.value = turma;
-        option.textContent = turma;
-        selectTurmas.appendChild(option);
-    });
-}
-
-    filtradas.forEach(turma => {
-        const option = document.createElement("option");
-        option.value = turma;
-        option.textContent = turma;
-        selectTurmas.appendChild(option);
-    });
-}
-</script>
+        function voltarParaSelecao() {
+            document.getElementById("tela-carometro").classList.add("hidden");
+            document.getElementById("tela-selecao").classList.remove("hidden");
+        }
+    </script>
 </body>
 </html>
